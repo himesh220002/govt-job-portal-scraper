@@ -50,15 +50,37 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
     : [];
 
   const parsePairs = (rawText: string) => {
-    const lines = cleanText(rawText).split('\n').filter(Boolean);
-    const result = [];
+    const lines = cleanText(rawText).split('\n').map(l => l.trim()).filter(Boolean);
+    const result: { label: string, value: string }[] = [];
+    
+    // First pass: merge dangling colons and broken labels from 3-column table layouts
+    const mergedLines: string[] = [];
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+      if (lines[i] === ':') {
+        if (mergedLines.length > 0 && i + 1 < lines.length) {
+          const prev = mergedLines.pop();
+          mergedLines.push(prev + ' : ' + lines[i + 1]);
+          i++; // skip next line
+        }
+      } else if (lines[i].startsWith(':') || (lines[i].endsWith(':') && lines[i].length <= 5)) {
+        if (mergedLines.length > 0 && !mergedLines[mergedLines.length - 1].includes(':')) {
+          const prev = mergedLines.pop();
+          mergedLines.push(prev + ' ' + lines[i]);
+        } else {
+          mergedLines.push(lines[i]);
+        }
+      } else {
+        mergedLines.push(lines[i]);
+      }
+    }
+
+    for (let i = 0; i < mergedLines.length; i++) {
+      const line = mergedLines[i];
       const lower = line.toLowerCase();
       if (lower === 'important dates' || lower === 'application fee' || lower === 'age limit' || lower.includes('age relaxation')) continue;
 
       if (line.endsWith(':')) {
-        result.push({ label: line, value: lines[i + 1] ? lines[i + 1].trim() : '' });
+        result.push({ label: line, value: mergedLines[i + 1] ? mergedLines[i + 1] : '' });
         i++; // skip next line as it's the value
       } else if (line.includes(':')) {
         const [l, ...v] = line.split(':');
@@ -95,8 +117,8 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                 <div key={idx} className="flex flex-col space-y-2">
                   {parsePairs(item.raw_text).map((pair, i) => (
                     <div key={i} className={`flex justify-between items-start gap-4 ${pair.label ? 'border-b border-gray-100 pb-2 last:border-0' : ''}`}>
-                      {pair.label && <span className="font-medium text-gray-700 w-1/2">{pair.label}</span>}
-                      <span className={`${pair.label ? "text-gray-900 text-right w-1/2" : "text-gray-600"}`}>{pair.value}</span>
+                      {pair.label && <span className="font-medium text-gray-700 w-fit">{pair.label}</span>}
+                      <span className={`${pair.label ? "text-gray-900 text-right w-full" : "text-gray-600"}`}>{pair.value}</span>
                     </div>
                   ))}
                 </div>
@@ -114,8 +136,8 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                 <div key={idx} className="flex flex-col space-y-2">
                   {parsePairs(item.raw_text).map((pair, i) => (
                     <div key={i} className={`flex justify-between items-start gap-4 ${pair.label ? 'border-b border-gray-100 pb-2 last:border-0' : ''}`}>
-                      {pair.label && <span className="font-medium text-gray-700 w-1/2">{pair.label}</span>}
-                      <span className={`${pair.label ? "text-gray-900 text-right w-1/2" : "text-blue-800"}`}>{pair.value}</span>
+                      {pair.label && <span className="font-medium text-gray-700 w-fit border-1 border-gray-200 p-1 ">{pair.label}</span>}
+                      <span className={`${pair.label ? "text-gray-900 text-right w-full" : "text-blue-800"}`}>{pair.value}</span>
                     </div>
                   ))}
                 </div>
@@ -133,8 +155,8 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                 <div key={idx} className="flex flex-col space-y-2">
                   {parsePairs(item.raw_text).map((pair, i) => (
                     <div key={i} className={`flex justify-between items-start gap-4 ${pair.label ? 'border-b border-gray-100 pb-2 last:border-0' : ''}`}>
-                      {pair.label && <span className="font-medium text-gray-700 w-1/2">{pair.label}</span>}
-                      <span className={`${pair.label ? "text-gray-900 text-right w-1/2" : "text-gray-600"}`}>{pair.value}</span>
+                      {pair.label && <span className="font-medium text-gray-700 w-fit border-1 border-gray-200 p-1 ">{pair.label}</span>}
+                      <span className={`${pair.label ? "text-gray-900 text-right w-full" : "text-gray-600"}`}>{pair.value}</span>
                     </div>
                   ))}
                 </div>

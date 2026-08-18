@@ -1,34 +1,34 @@
 import Link from 'next/link';
 
 const topExams = [
-  { title: "UPSC Civil Services Exam (CSE)", fact: "Prelims May 24, Mains Aug 21, 2026", link: "/category/latest-job" },
-  { title: "SSC CGL 2026", fact: "Tier I June–July 2026", link: "/category/latest-job" },
-  { title: "SBI PO 2026", fact: "Prelims Aug 22–23, 2026", link: "/category/latest-job" },
-  { title: "RRB NTPC 2026", fact: "CBT May–June 2026", link: "/category/latest-job" },
-  { title: "NDA I & II 2026", fact: "April 12 & Sept 13, 2026", link: "/category/latest-job" },
+  { title: "UPSC Civil Services Exam (CSE)", fact: "Prelims May 24, Mains Aug 21, 2026", link: "/search?q=UPSC+Civil+Services+Exam" },
+  { title: "SSC CGL 2026", fact: "Tier I June–July 2026", link: "/search?q=SSC+CGL" },
+  { title: "SBI PO 2026", fact: "Prelims Aug 22–23, 2026", link: "/search?q=SBI+PO" },
+  { title: "RRB NTPC 2026", fact: "CBT May–June 2026", link: "/search?q=RRB+NTPC" },
+  { title: "NDA I & II 2026", fact: "April 12 & Sept 13, 2026", link: "/search?q=NDA" },
 ];
 
 const topJobs = [
-  { title: "IAS/IPS/IFS", fact: "Most prestigious civil services roles", link: "/category/latest-job" },
-  { title: "SSC CGL Posts", fact: "Income Tax Inspector, Audit Officer", link: "/category/latest-job" },
-  { title: "IBPS PO & Clerk", fact: "Banking sector jobs", link: "/category/latest-job" },
+  { title: "Railway Recruitment", fact: "Latest RRB Job Openings", link: "/search?q=Railway+RRB" },
+  { title: "SSC Combined Exams", fact: "CGL, CHSL & MTS Posts", link: "/search?q=SSC" },
+  { title: "Banking Sector Jobs", fact: "PO, Clerk & SO Openings", link: "/search?q=Bank+PO+Clerk" },
 ];
 
 const topAdmissions = [
-  { title: "IIT Bombay", fact: "Median package ₹20.2 LPA", link: "/category/admission" },
-  { title: "IIT Delhi", fact: "Median package ₹19.08 LPA", link: "/category/admission" },
-  { title: "IIT Madras", fact: "Median package ₹17.78 LPA", link: "/category/admission" },
+  { title: "IIT Admissions", fact: "JEE Advanced Updates", link: "/search?q=IIT" },
+  { title: "IIM Admissions", fact: "CAT & Management", link: "/search?q=IIM+CAT" },
+  { title: "Medical (AIIMS/NEET)", fact: "MBBS & BDS Counseling", link: "/search?q=Medical" },
 ];
 
 const latestAnswerKeys = [
-  { title: "UGC NET June 2026", fact: "Released Aug 16, 2026", link: "/category/answer-key", cta: "Download Key" },
-  { title: "UPSC Prelims 2026", fact: "Released May 27, 2026", link: "/category/answer-key", cta: "Download Key" },
+  { title: "UGC NET Answer Key", fact: "Latest NTA UGC NET Updates", link: "/search?q=UGC+NET+Answer+Key", cta: "Download Key" },
+  { title: "SSC / Railway Keys", fact: "Latest Official Keys", link: "/search?q=SSC+Railway", cta: "Download Key" },
 ];
 
 const topSyllabus = [
-  { title: "UPSC CSE Syllabus", fact: "Prelims & Mains (9 papers)", link: "/category/syllabus", cta: "View Syllabus" },
-  { title: "SSC CGL Syllabus", fact: "Tier I & II (Reasoning, GK, Quant)", link: "/category/syllabus", cta: "View Syllabus" },
-  { title: "RRB NTPC Syllabus", fact: "CBT 1 & 2 (Maths, Reasoning)", link: "/category/syllabus", cta: "View Syllabus" },
+  { title: "UPSC CSE Syllabus", fact: "Prelims & Mains (9 papers)", link: "/search?q=UPSC+Syllabus", cta: "View Syllabus" },
+  { title: "SSC CGL Syllabus", fact: "Tier I & II (Reasoning, GK, Quant)", link: "/search?q=SSC+CGL+Syllabus", cta: "View Syllabus" },
+  { title: "RRB NTPC Syllabus", fact: "CBT 1 & 2 (Maths, Reasoning)", link: "/search?q=RRB+NTPC+Syllabus", cta: "View Syllabus" },
 ];
 
 const Card = ({ title, fact, link, cta = "View Details", variant = "default" }: any) => {
@@ -36,7 +36,7 @@ const Card = ({ title, fact, link, cta = "View Details", variant = "default" }: 
     default: "bg-white border border-gray-100 hover:border-blue-300",
     highlight: "bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 hover:border-blue-400",
   };
-  
+
   return (
     <div className={`p-5 rounded-2xl shadow-sm hover:shadow-md transition-all group flex flex-col justify-between h-full ${styles[variant as keyof typeof styles]}`}>
       <div>
@@ -54,7 +54,7 @@ export default function HeroSection() {
   return (
     <section className="py-12 bg-gray-50/50 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4">
-        
+
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-6">
             <span className="bg-blue-100 text-blue-800 p-2 rounded-lg text-xl">🎓</span>

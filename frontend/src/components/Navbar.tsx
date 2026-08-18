@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import SearchBar from './SearchBar';
+
 export default function Navbar() {
   return (
     <header className="h-[200px] bg-gradient-to-r from-blue-900 via-indigo-800 to-blue-900 text-white shadow-xl relative overflow-hidden">
@@ -36,12 +38,7 @@ export default function Navbar() {
 
         {/* Optional Search / Quick Action Bar */}
         <div className="mt-8 max-w-2xl mx-auto w-full">
-           <div className="relative group">
-             <input type="text" placeholder="Search exams, jobs, results..." className="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-blue-200 rounded-full py-3 px-6 outline-none focus:bg-white/20 focus:border-cyan-300 transition-all shadow-inner"/>
-             <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-cyan-500 hover:bg-cyan-400 text-blue-900 font-bold rounded-full px-6 py-2 transition-colors shadow-md">
-                Search
-             </button>
-           </div>
+           <SearchBar />
         </div>
       </div>
     </header>
