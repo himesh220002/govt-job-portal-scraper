@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   description: "Browse the latest government jobs, results, and admit cards.",
 };
 
+import NextTopLoader from 'nextjs-toploader';
+
+import Navbar from '@/components/Navbar';
+
 export default function RootLayout({
   children,
 }: {
@@ -13,7 +17,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="bg-gray-50 text-gray-900 font-sans antialiased">
+        <NextTopLoader color="#2563eb" showSpinner={false} />
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }

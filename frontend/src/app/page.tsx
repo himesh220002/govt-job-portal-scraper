@@ -1,18 +1,26 @@
 import Link from 'next/link';
 import clientPromise from '@/lib/mongodb';
 import { categorizeJobs } from '@/lib/categorize';
+import HeroSection from '@/components/HeroSection';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
-async function getJobs() {
-  const client = await clientPromise;
-  const db = client.db('govtJobScraperDB');
-  const jobs = await db.collection('scraper')
-    .find({})
-    .toArray();
+import { unstable_cache } from 'next/cache';
 
-  return JSON.parse(JSON.stringify(jobs));
-}
+const getJobs = unstable_cache(
+  async () => {
+    const client = await clientPromise;
+    const db = client.db('govtJobScraperDB');
+    const jobs = await db.collection('scraper')
+      .find({})
+      .project({ _id: 1, recordId: 1, title: 1, category: 1, scrapedAt: 1 })
+      .toArray();
+
+    return JSON.parse(JSON.stringify(jobs));
+  },
+  ['all-jobs'],
+  { revalidate: 60, tags: ['jobs'] }
+);
 
 export default async function Home() {
   const jobs = await getJobs();
@@ -25,15 +33,20 @@ export default async function Home() {
   ];
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-center text-4xl font-bold text-gray-900 mb-2">Govt Jobs Portal</h1>
-      <p className="text-center text-gray-500 text-md mb-10">Your latest portal for all Sarkari Results and Job Postings.</p>
+    <main>
+      <HeroSection />
+      
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="mb-12">
+          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-4">Latest Portal Updates</h2>
+          <p className="text-center text-gray-500 text-lg">Browse through all recent Sarkari Results and Job Postings.</p>
+        </div>
 
-      {jobs.length === 0 ? (
-        <p className="text-gray-500 text-center">No jobs found in the database. Run the scraper first!</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categoryOrder.map((catName) => {
+        {jobs.length === 0 ? (
+          <p className="text-gray-500 text-center">No jobs found in the database. Run the scraper first!</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categoryOrder.map((catName) => {
             const items = categorizedJobs[catName];
             const displayItems = items.slice(0, 20);
 
@@ -72,6 +85,7 @@ export default async function Home() {
           })}
         </div>
       )}
+      </div>
     </main>
   );
 }

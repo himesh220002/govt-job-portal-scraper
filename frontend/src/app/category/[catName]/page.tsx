@@ -5,15 +5,22 @@ import { categorizeJobs } from '@/lib/categorize';
 
 export const revalidate = 60;
 
-async function getJobs() {
-  const client = await clientPromise;
-  const db = client.db('govtJobScraperDB');
-  const jobs = await db.collection('scraper')
-    .find({})
-    .toArray();
-    
-  return JSON.parse(JSON.stringify(jobs));
-}
+import { unstable_cache } from 'next/cache';
+
+const getJobs = unstable_cache(
+  async () => {
+    const client = await clientPromise;
+    const db = client.db('govtJobScraperDB');
+    const jobs = await db.collection('scraper')
+      .find({})
+      .project({ _id: 1, recordId: 1, title: 1, category: 1, scrapedAt: 1 })
+      .toArray();
+      
+    return JSON.parse(JSON.stringify(jobs));
+  },
+  ['all-jobs'],
+  { revalidate: 60, tags: ['jobs'] }
+);
 
 export default async function CategoryPage({ params }: { params: Promise<{ catName: string }> }) {
   const resolvedParams = await params;

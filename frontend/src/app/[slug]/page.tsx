@@ -4,12 +4,18 @@ import clientPromise from '@/lib/mongodb';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
-async function getJob(slug: string) {
-  const client = await clientPromise;
-  const db = client.db('govtJobScraperDB');
-  const job = await db.collection('scraper').findOne({ recordId: slug });
-  return job ? JSON.parse(JSON.stringify(job)) : null;
-}
+import { unstable_cache } from 'next/cache';
+
+const getJob = unstable_cache(
+  async (slug: string) => {
+    const client = await clientPromise;
+    const db = client.db('govtJobScraperDB');
+    const job = await db.collection('scraper').findOne({ recordId: slug });
+    return job ? JSON.parse(JSON.stringify(job)) : null;
+  },
+  ['job-detail'],
+  { revalidate: 60, tags: ['job'] }
+);
 
 // Clean up SarkariResult watermarks and promotional text
 function cleanText(text: string) {
