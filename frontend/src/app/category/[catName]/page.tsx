@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import clientPromise from '@/lib/mongodb';
 import { categorizeJobs } from '@/lib/categorize';
+import { categoryMeta } from '@/lib/categoryMeta';
+import CategoryJobList from '@/components/CategoryJobList';
 
 export const revalidate = 60;
 
@@ -15,31 +17,31 @@ const getJobs = unstable_cache(
       .find({})
       .project({ _id: 1, recordId: 1, title: 1, category: 1, scrapedAt: 1 })
       .toArray();
-      
+
     return JSON.parse(JSON.stringify(jobs));
   },
   ['all-jobs'],
   { revalidate: 60, tags: ['jobs'] }
 );
 
+const CATEGORY_MAP: Record<string, string> = {
+  'result': 'Result',
+  'admit-card': 'Admit Card',
+  'latest-job': 'Latest Job',
+  'answer-key': 'Answer Key',
+  'syllabus': 'Syllabus',
+  'admission': 'Admission',
+  'certificate': 'Certificate',
+  'outsourcing-offline-job': 'Outsourcing/Offline Job',
+  'important': 'Important'
+};
+
 export default async function CategoryPage({ params }: { params: Promise<{ catName: string }> }) {
   const resolvedParams = await params;
   const rawCatName = resolvedParams.catName;
-  
-  const categoryMap: Record<string, string> = {
-    'result': 'Result',
-    'admit-card': 'Admit Card',
-    'latest-job': 'Latest Job',
-    'answer-key': 'Answer Key',
-    'syllabus': 'Syllabus',
-    'admission': 'Admission',
-    'certificate': 'Certificate',
-    'outsourcing-offline-job': 'Outsourcing/Offline Job',
-    'important': 'Important'
-  };
-  
-  const originalCatName = categoryMap[rawCatName.toLowerCase()];
-  
+
+  const originalCatName = CATEGORY_MAP[rawCatName.toLowerCase()];
+
   if (!originalCatName) {
     notFound();
   }
@@ -47,46 +49,58 @@ export default async function CategoryPage({ params }: { params: Promise<{ catNa
   const jobs = await getJobs();
   const categorizedJobs = categorizeJobs(jobs);
   const categoryJobs = categorizedJobs[originalCatName] || [];
+  const meta = categoryMeta(originalCatName);
 
   return (
-    <main className="max-w-5xl mx-auto px-5 py-10">
-      <Link href="/" className="inline-flex items-center text-gray-500 mb-6 font-medium text-sm hover:text-gray-900 transition-colors">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Back to Home
-      </Link>
+    <main className="min-h-screen bg-slate-50">
+      {/* Compact dark header */}
+      <section className="relative overflow-hidden bg-[#050914] text-white">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050914] via-[#0a1a3f] to-[#10255c]" />
+        <div className="bg-grid-dark absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_80%_70%_at_50%_0%,black,transparent)]" />
+        <div className="absolute -top-20 left-1/4 h-64 w-64 rounded-full bg-blue-600/30 blur-[100px] animate-blob" />
+        <div className="absolute top-0 right-1/5 h-56 w-56 rounded-full bg-cyan-400/20 blur-[100px] animate-blob [animation-delay:2s]" />
 
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden mb-8">
-        <div className="bg-blue-800 text-white font-bold text-xl p-4 text-center tracking-wide uppercase">
-          {originalCatName} ({categoryJobs.length})
+        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 py-10 sm:py-14">
+          {/* <Link
+            href="/"
+            className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-blue-100 backdrop-blur-md transition-all hover:border-cyan-300/50 hover:bg-white/10 hover:text-cyan-200"
+          >
+            <svg className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to Home
+          </Link> */}
+
+          <div className="mt-6 flex flex-col items-center text-center">
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-3xl backdrop-blur-md ring-1 ring-white/20 shadow-lg">
+              {meta.icon}
+            </span>
+            <h1 className="mt-5 font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+              {originalCatName}
+            </h1>
+            <p className="mt-3 text-sm text-blue-100/85 sm:text-base">
+              Latest updates for {originalCatName} — notifications, dates and official links in one place.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-sm font-bold text-cyan-200 backdrop-blur-md">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
+              </span>
+              {categoryJobs.length} live updates
+            </span>
+          </div>
         </div>
-        
-        <ul className="flex-1 p-0 m-0 divide-y divide-gray-100">
-          {categoryJobs.length > 0 ? (
-            categoryJobs.map((job: any) => (
-              <li key={job._id} className="transition-colors hover:bg-gray-50 flex items-center justify-between px-5 py-4">
-                <div className="flex flex-col pr-4">
-                   <Link 
-                     href={`/${job.recordId}`} 
-                     className="text-lg text-gray-900 hover:text-blue-700 font-semibold leading-tight mb-1"
-                   >
-                     {job.title}
-                   </Link>
-                   <span className="text-sm text-gray-500">{new Date(job.scrapedAt).toLocaleDateString()}</span>
-                </div>
-                <Link href={`/${job.recordId}`} className="flex-shrink-0 bg-blue-50 text-blue-700 border border-blue-600 px-4 py-2 rounded-md font-medium text-sm hover:bg-blue-100 transition-colors">
-                   View
-                </Link>
-              </li>
-            ))
-          ) : (
-            <li className="px-5 py-10 text-center text-gray-400">
-              No updates in this section yet.
-            </li>
-          )}
-        </ul>
+
+        <div className="absolute inset-x-0 bottom-0 z-20 leading-none">
+          <svg className="block h-8 w-full sm:h-12" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,30 C360,58 1080,6 1440,34 L1440,60 L0,60 Z" fill="#eef2ff" opacity="0.6" />
+            <path d="M0,40 C360,60 1080,20 1440,44 L1440,60 L0,60 Z" fill="#f8fafc" />
+          </svg>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10">
+        <CategoryJobList originalCatName={originalCatName} categoryJobs={categoryJobs} />
       </div>
     </main>
   );

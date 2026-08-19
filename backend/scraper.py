@@ -241,17 +241,27 @@ def run_pipeline():
             for link in links:
                 url_lower = link['url'].lower()
                 
-                # Determine allowed years based on category page or URL content
-                if 'syllabus' in page_url or 'syllabus' in url_lower:
-                    allowed_years = ['2024', '2025', '2026']
-                elif 'certificate' in page_url or 'important' in page_url or 'important' in url_lower:
-                    allowed_years = ['2025', '2026']
-                else:
-                    allowed_years = ['2026']
+                is_bypass_year_filter = (
+                    'certificate' in page_url or 'important' in page_url or 
+                    'certificate' in url_lower or 'important' in url_lower or 
+                    
+                    'offline' in page_url or 'outsourcing' in page_url or
+                    'offline' in url_lower or 'outsourcing' in url_lower
+                )
                 
-                # Filter by allowed years
-                if any(year in url_lower for year in allowed_years):
+                if is_bypass_year_filter:
+                    # Allow all links for certificate, important, offline, and outsourcing categories
                     all_links[link['url']] = link
+                else:
+                    # Determine allowed years for other categories
+                    if 'syllabus' in page_url or 'syllabus' in url_lower:
+                        allowed_years = ['2024', '2025', '2026']
+                    else:
+                        allowed_years = ['2026']
+                    
+                    # Filter by allowed years
+                    if any(year in url_lower for year in allowed_years):
+                        all_links[link['url']] = link
                     
     final_links = list(all_links.values())
     logger.info(f"Discovered {len(final_links)} unique job links for 2026 across all categories.")

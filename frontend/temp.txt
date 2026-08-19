@@ -1,0 +1,44 @@
+📚 Official Study Material Sources
+NCERT Online Textbooks → Free PDFs for Classes I–XII in Hindi, English, Urdu. Foundation for UPSC, SSC, Banking.
+Link: https://ncert.nic.in/textbook.php (ncert.nic.in in Bing)
+
+DIKSHA Platform → Ministry of Education’s digital platform with NCERT video lessons, practice questions, teacher resources.
+Link: https://diksha.gov.in
+
+SWAYAM Courses → Free online courses from IITs, IIMs, universities. Useful for UPSC optional subjects, management, engineering.
+Link: https://swayam.gov.in
+
+PRS Legislative Research → Simplified summaries of Bills, Acts, policies. Excellent for Polity and Governance prep.
+Link: https://prsindia.org
+
+Economic Survey of India → Official government publication, essential for UPSC/Banking economy sections.
+Link: https://www.indiabudget.gov.in (indiabudget.gov.in in Bing)
+
+📝 Previous Year Question Papers (PYQs)
+SSC Official Website (ssc.nic.in in Bing) → Direct PDFs of SSC CGL, CHSL, MTS, etc.
+
+UPSC Official Website (upsc.gov.in in Bing) → Authentic UPSC Prelims and Mains papers.
+
+IBPS Official Website → Banking exam papers (PO, Clerk, SO).
+
+NTA Exams Portal → NEET, JEE, UGC NET previous year papers.
+
+Railway Recruitment Board (RRB) → NTPC, Group D, ALP PYQs.
+
+📘 Syllabus Sources
+UPSC Official Syllabus (upsc.gov.in in Bing) → Prelims and Mains syllabus PDFs.
+
+SSC Official Syllabus (ssc.nic.in in Bing) → SSC CGL, CHSL, MTS, etc.
+
+IBPS Syllabus → Banking exam syllabus (PO, Clerk, SO).
+
+NTA Syllabus → NEET, JEE, UGC NET syllabus PDFs.
+
+[State PSC Websites] → Each state PSC (e.g., BPSC, MPPSC, UPPSC) publishes official syllabus PDFs.
+
+⚡ Why These Work
+They are official government portals → no risk of scraping broken or fake sites.
+
+They provide direct PDFs → easy to normalize into your JSON schema.
+
+They cover all major categories → UPSC, SSC, Banking, Railways, NEET/JEE, State PSCs.

@@ -1,14 +1,28 @@
 import type { Metadata } from "next";
+import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
+
+import NextTopLoader from "nextjs-toploader";
+
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Govt Jobs Portal - Sarkari Result",
   description: "Browse the latest government jobs, results, and admit cards.",
 };
-
-import NextTopLoader from 'nextjs-toploader';
-
-import Navbar from '@/components/Navbar';
 
 export default function RootLayout({
   children,
@@ -16,11 +30,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-gray-50 text-gray-900 font-sans antialiased">
+    <html lang="en" className={`${manrope.variable} ${inter.variable}`}>
+      <body className="bg-slate-50 text-slate-900 font-sans antialiased">
         <NextTopLoader color="#2563eb" showSpinner={false} />
         <Navbar />
-        {children}
+        <main className="flex min-h-screen flex-col">{children}</main>
+        <Footer />
       </body>
     </html>
   );

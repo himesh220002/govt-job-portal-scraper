@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import clientPromise from '@/lib/mongodb';
+import { categoryMeta } from '@/lib/categoryMeta';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
@@ -36,23 +37,120 @@ function cleanText(text: string) {
   return cleaned.trim();
 }
 
+interface RawItem {
+  raw_text: string;
+}
+
+interface JobDetail {
+  recordId: string;
+  title: string;
+  shortDescription?: string;
+  category?: string;
+  scrapedAt?: string;
+  importantDates?: { _raw?: RawItem[] };
+  applicationFee?: { _raw?: RawItem[] };
+  ageLimit?: { _raw?: RawItem[] };
+  vacancyDetails?: Record<string, string>[];
+  importantLinks?: Record<string, string>;
+}
+
+type InfoCardProps = {
+  icon: string;
+  title: string;
+  gradient: string;
+  chip: string;
+  children: React.ReactNode;
+};
+
+function InfoCard({ icon, title, gradient, chip, children }: InfoCardProps) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-slate-900/10">
+      <div className={`flex items-center gap-3 bg-gradient-to-r ${gradient} px-5 py-4 text-white`}>
+        <span className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-lg backdrop-blur-sm shadow-inner`}>
+          {icon}
+        </span>
+        <h3 className="font-display text-base font-extrabold tracking-wide uppercase">{title}</h3>
+      </div>
+      <div className={`p-5 ${chip}`}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function KeyValueRows({ pairs }: { pairs: { label: string; value: string }[] }) {
+  return (
+    <div className="space-y-0">
+      {pairs.map((pair, i) => (
+        <div key={i} className={`flex items-center justify-between gap-4 mb-2 rounded-lg hover:bg-slate-100 ${pair.label ? 'border-b border-slate-100 p-2 last:border-0' : ''}`}>
+          {pair.label && (
+            <span className="w-fit shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-sm font-semibold text-slate-700">
+              {pair.label}
+            </span>
+          )}
+          <span className={`text-right text-sm ${pair.label ? 'w-full font-medium text-slate-900' : 'text-slate-600'}`}>
+            {pair.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function linkIcon(finalLabel: string) {
+  if (finalLabel.includes('PDF')) {
+    return (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+    );
+  }
+  if (finalLabel.includes('VIDEO')) {
+    return (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="23 7 16 12 23 17 23 7"></polygon>
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+      </svg>
+    );
+  }
+  return (
+    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+      <polyline points="15 3 21 3 21 9"></polyline>
+      <line x1="10" y1="14" x2="21" y2="3"></line>
+    </svg>
+  );
+}
+
 export default async function JobDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const job = await getJob(resolvedParams.slug);
+  const job = (await getJob(resolvedParams.slug)) as JobDetail | null;
 
   if (!job) {
     notFound();
   }
 
-  // Helper to extract keys safely for dynamic tables
-  const vacancyHeaders = job.vacancyDetails && job.vacancyDetails.length > 0
-    ? Object.keys(job.vacancyDetails[0])
-    : [];
+  const vacancyTables: Array<{ headers: string[], rows: Record<string, string>[] }> = [];
+  if (job.vacancyDetails && job.vacancyDetails.length > 0) {
+    job.vacancyDetails.forEach(row => {
+      const headers = Object.keys(row);
+      const headerKey = headers.join('|');
+      
+      let table = vacancyTables.find(t => t.headers.join('|') === headerKey);
+      if (!table) {
+        table = { headers, rows: [] };
+        vacancyTables.push(table);
+      }
+      table.rows.push(row);
+    });
+  }
 
   const parsePairs = (rawText: string) => {
     const lines = cleanText(rawText).split('\n').map(l => l.trim()).filter(Boolean);
     const result: { label: string, value: string }[] = [];
-    
+
     // First pass: merge dangling colons and broken labels from 3-column table layouts
     const mergedLines: string[] = [];
     for (let i = 0; i < lines.length; i++) {
@@ -92,121 +190,153 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
     return result;
   };
 
+  const meta = categoryMeta(job.category);
+
+  const importantDates = job.importantDates?._raw ?? [];
+  const applicationFees = job.applicationFee?._raw ?? [];
+  const ageLimits = job.ageLimit?._raw ?? [];
+
+  const importantLinks = job.importantLinks ?? {};
+
+  const hasInfoCards = importantDates.length > 0 || applicationFees.length > 0 || ageLimits.length > 0;
+  const hasLinks = Object.keys(importantLinks).length > 0;
+
   return (
-    <main className="max-w-4xl mx-auto px-5 py-10">
-      <Link href="/" className="inline-flex items-center text-gray-500 mb-6 font-medium text-sm hover:text-gray-900 transition-colors">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Back to Jobs
-      </Link>
+    <main className="min-h-screen bg-slate-50">
+      {/* Compact dark header */}
+      <section className="relative overflow-hidden bg-[#050914] text-white">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050914] via-[#0a1a3f] to-[#10255c]" />
+        <div className="bg-grid-dark absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_80%_70%_at_50%_0%,black,transparent)]" />
+        <div className="absolute -top-20 left-1/4 h-64 w-64 rounded-full bg-blue-600/30 blur-[100px] animate-blob" />
+        <div className="absolute top-0 right-1/5 h-56 w-56 rounded-full bg-cyan-400/20 blur-[100px] animate-blob [animation-delay:2s]" />
 
-      <div className="my-8 pb-6 border-b border-gray-200 flex flex-col items-center justify-center gap-6">
-        <h1 className="text-2xl sm:text-3xl text-center font-semibold leading-snug mb-3 text-gray-900">{cleanText(job.title)}</h1>
-        <p className="text-md sm:text-lg text-center text-blue-900 max-w-3xl">{cleanText(job.shortDescription)}</p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-5 mb-8">
-        {/* Important Dates */}
-        {job.importantDates?._raw?.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 uppercase tracking-wide">📅 Important Dates</h3>
-            <div className="space-y-3">
-              {job.importantDates._raw.map((item: any, idx: number) => (
-                <div key={idx} className="flex flex-col space-y-2">
-                  {parsePairs(item.raw_text).map((pair, i) => (
-                    <div key={i} className={`flex justify-between items-start gap-4 ${pair.label ? 'border-b border-gray-100 pb-2 last:border-0' : ''}`}>
-                      {pair.label && <span className="font-medium text-gray-700 w-fit">{pair.label}</span>}
-                      <span className={`${pair.label ? "text-gray-900 text-right w-full" : "text-gray-600"}`}>{pair.value}</span>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Application Fee */}
-        {job.applicationFee?._raw?.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 uppercase tracking-wide">💳 Application Fee</h3>
-            <div className="space-y-3">
-              {job.applicationFee._raw.map((item: any, idx: number) => (
-                <div key={idx} className="flex flex-col space-y-2">
-                  {parsePairs(item.raw_text).map((pair, i) => (
-                    <div key={i} className={`flex justify-between items-start gap-4 ${pair.label ? 'border-b border-gray-100 pb-2 last:border-0' : ''}`}>
-                      {pair.label && <span className="font-medium text-gray-700 w-fit border-1 border-gray-200 p-1 ">{pair.label}</span>}
-                      <span className={`${pair.label ? "text-gray-900 text-right w-full" : "text-blue-800"}`}>{pair.value}</span>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Age Limit */}
-        {job.ageLimit?._raw?.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 uppercase tracking-wide">⏳ Age Limit</h3>
-            <div className="space-y-3">
-              {job.ageLimit._raw.map((item: any, idx: number) => (
-                <div key={idx} className="flex flex-col space-y-2">
-                  {parsePairs(item.raw_text).map((pair, i) => (
-                    <div key={i} className={`flex justify-between items-start gap-4 ${pair.label ? 'border-b border-gray-100 pb-2 last:border-0' : ''}`}>
-                      {pair.label && <span className="font-medium text-gray-700 w-fit border-1 border-gray-200 p-1 ">{pair.label}</span>}
-                      <span className={`${pair.label ? "text-gray-900 text-right w-full" : "text-gray-600"}`}>{pair.value}</span>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Vacancy Details Table */}
-      {job.vacancyDetails && job.vacancyDetails.length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold text-gray-900 mb-3">
-            📋 Vacancy Details
-          </h3>
-          <div className="w-full overflow-x-auto bg-white border border-gray-200 rounded-lg">
-            <table className="w-full border-collapse text-left">
-              <thead>
-                <tr className="bg-gray-50 text-gray-900 font-semibold border-b border-gray-200">
-                  {vacancyHeaders.map((header) => (
-                    <th key={header} className="p-3 text-lg whitespace-nowrap">{header}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {job.vacancyDetails.map((row: any, idx: number) => (
-                  <tr key={idx} className="border-b border-gray-200 last:border-0 hover:bg-gray-50 transition-colors">
-                    {vacancyHeaders.map((header) => (
-                      <td key={header} className="p-3 text-md text-gray-600">{cleanText(row[header])}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 py-10 sm:py-14">
+          <div className="mt-6">
+            {job.category && (
+              <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide ${meta.badge}`}>
+                {job.category}
+              </span>
+            )}
+            <h1 className="mt-4 font-display text-2xl font-extrabold leading-snug tracking-tight text-white sm:text-3xl">
+              {cleanText(job.title)}
+            </h1>
+            {job.shortDescription && (
+              <p className="mt-4 max-w-3xl text-sm leading-relaxed text-blue-100/85 sm:text-base">
+                {cleanText(job.shortDescription)}
+              </p>
+            )}
+            {job.scrapedAt && (
+              <p className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-blue-200/70">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                Updated {new Date(job.scrapedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </p>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Important Links */}
-      {job.importantLinks && Object.keys(job.importantLinks).length > 0 && (
-        <div className="mt-8 mb-10">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            🔗 Important Links
-          </h3>
-          <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <div className="flex flex-col space-y-3">
-              {Object.entries(job.importantLinks).map(([key, url]: [string, any]) => {
+        <div className="absolute inset-x-0 bottom-0 z-20 leading-none">
+          <svg className="block h-8 w-full sm:h-12" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,30 C360,58 1080,6 1440,34 L1440,60 L0,60 Z" fill="#eef2ff" opacity="0.6" />
+            <path d="M0,40 C360,60 1080,20 1440,44 L1440,60 L0,60 Z" fill="#f8fafc" />
+          </svg>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-10">
+        {/* Info cards */}
+        {hasInfoCards && (
+          <div className="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-1">
+            {importantDates.length > 0 && (
+              <InfoCard icon="📅" title="Important Dates" gradient="from-blue-600 to-indigo-600" chip="bg-white">
+                <div className="space-y-3">
+                  {importantDates.map((item: RawItem, idx: number) => (
+                    <KeyValueRows key={idx} pairs={parsePairs(item.raw_text)} />
+                  ))}
+                </div>
+              </InfoCard>
+            )}
+
+            {applicationFees.length > 0 && (
+              <InfoCard icon="💳" title="Application Fee" gradient="from-emerald-600 to-teal-600" chip="bg-white">
+                <div className="space-y-3">
+                  {applicationFees.map((item: RawItem, idx: number) => (
+                    <KeyValueRows key={idx} pairs={parsePairs(item.raw_text)} />
+                  ))}
+                </div>
+              </InfoCard>
+            )}
+
+            {ageLimits.length > 0 && (
+              <InfoCard icon="⏳" title="Age Limit" gradient="from-amber-500 to-orange-600" chip="bg-white">
+                <div className="space-y-3">
+                  {ageLimits.map((item: RawItem, idx: number) => (
+                    <KeyValueRows key={idx} pairs={parsePairs(item.raw_text)} />
+                  ))}
+                </div>
+              </InfoCard>
+            )}
+          </div>
+        )}
+
+        {/* Vacancy Details Table */}
+        {vacancyTables.length > 0 && (
+          <div className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-3 bg-gradient-to-r from-slate-800 to-slate-900 px-5 py-4 text-white">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-lg backdrop-blur-sm">📋</span>
+              <h3 className="font-display text-base font-extrabold tracking-wide uppercase">Vacancy Details</h3>
+            </div>
+            
+            <div className="divide-y divide-slate-200">
+              {vacancyTables.map((table, tableIdx) => (
+                <div key={tableIdx} className="w-full overflow-x-auto">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50 text-slate-900">
+                        {table.headers.map((header) => (
+                          <th key={header} className="whitespace-nowrap px-4 py-3 text-sm font-bold uppercase tracking-wide border-r border-slate-200 last:border-r-0">{header}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {table.rows.map((row, idx) => (
+                        <tr key={idx} className="border-b border-slate-100 last:border-b-0 transition-colors hover:bg-blue-50/40">
+                          {table.headers.map((header) => (
+                            <td key={header} className="px-4 py-3 text-sm text-slate-600 border-r border-slate-100 last:border-r-0">{cleanText(row[header])}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Important Links */}
+        {hasLinks && (
+          <div className="mb-4">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/25">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+              </span>
+              <h3 className="font-display text-xl font-extrabold tracking-tight text-slate-900">Important Links</h3>
+              <span className="hidden sm:block h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {Object.entries(importantLinks).map(([key, url]) => {
                 const isGovUrl = url.includes('gov.in') || url.includes('nic.in');
                 const urlLower = url.toLowerCase();
-                let rawLabel = key.replace(/_/g, ' ').toUpperCase();
+                const rawLabel = key.replace(/_/g, ' ').toUpperCase();
 
                 // Remove spam links completely (from label or url)
                 if (
@@ -231,28 +361,38 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                   finalLabel = 'OPEN LINK';
                 }
 
-                // Truncate URL to 20+ chars
-                const displayUrl = url.length > 55 ? url.substring(0, 55) + '...' : url;
+                const displayUrl = url.length > 42 ? url.substring(0, 42) + '...' : url;
 
                 return (
-                  <div key={key} className="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0">
-                    <span className="font-medium text-gray-700 text-sm md:text-base w-1/2">{finalLabel} :</span>
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 hover:underline text-right text-sm w-1/2 truncate"
-                      title={url}
-                    >
-                      {displayUrl}
-                    </a>
-                  </div>
+                  <a
+                    key={key}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={url}
+                    className="group flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-600/10"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 transition-colors group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white">
+                        {linkIcon(finalLabel)}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-blue-700">
+                          {finalLabel}
+                        </span>
+                        <span className="block truncate text-xs text-slate-400">{displayUrl}</span>
+                      </span>
+                    </span>
+                    <svg className="h-4 w-4 shrink-0 text-slate-300 transition-all group-hover:translate-x-0.5 group-hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </a>
                 );
               })}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </main>
   );
 }
