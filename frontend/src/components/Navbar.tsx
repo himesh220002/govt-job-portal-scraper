@@ -29,7 +29,7 @@ const TICKER_ITEMS = [
 function LogoMark() {
   return (
     <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 shadow-lg shadow-blue-600/30 ring-1 ring-white/20 transition-transform duration-300 group-hover:scale-105">
-      <span className="text-lg font-extrabold tracking-tight text-white">GJP</span>
+      <span className="text-lg font-extrabold tracking-tight text-white">DJ</span>
       <div className="absolute -inset-1 rounded-xl bg-gradient-to-br from-blue-500/40 to-cyan-400/40 opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100" />
     </div>
   );
@@ -115,10 +115,10 @@ export default function Navbar() {
             <LogoMark />
             <div className="leading-tight">
               <span className="block font-display text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
-                Govt<span className="text-gradient">Jobs</span> Portal
+                Desh<span className="text-gradient">Job</span>.com
               </span>
               <span className="block text-[11px] sm:text-xs font-medium tracking-wide text-slate-500">
-                Your Sarkari Gateway
+                India's Govt Job Portal
               </span>
             </div>
           </Link>

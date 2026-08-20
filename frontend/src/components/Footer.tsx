@@ -7,6 +7,8 @@ const quickLinks = [
   { label: 'Admit Cards', href: '/category/admit-card' },
   { label: 'Results', href: '/category/result' },
   { label: 'Answer Keys', href: '/category/answer-key' },
+  { label: 'About Us', href: '/about' },
+  { label: 'FAQ', href: '/faq' },
 ];
 
 const categories = [
@@ -91,14 +93,14 @@ export default async function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="group flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 shadow-lg shadow-blue-600/30 ring-1 ring-white/20">
-                <span className="text-lg font-extrabold tracking-tight text-white">GJ</span>
+                <span className="text-lg font-extrabold tracking-tight text-white">DJ</span>
               </div>
               <div className="leading-tight">
                 <span className="block font-display text-lg font-extrabold tracking-tight text-white">
-                  Govt<span className="text-gradient">Jobs</span> Portal
+                  Desh<span className="text-gradient">Job</span>.com
                 </span>
                 <span className="block text-xs font-medium text-blue-200/70">
-                  Your Gateway to Sarkari Success
+                  India's Govt Job Portal
                 </span>
               </div>
             </Link>
@@ -173,7 +175,7 @@ export default async function Footer() {
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-blue-100/60">
-                © {new Date().getFullYear()} GovtJobs Portal. All rights reserved.
+                © {new Date().getFullYear()} DeshJob.com. All rights reserved.
               </p>
               <p className="text-[10px] text-emerald-400/80 font-medium tracking-wider uppercase flex items-center gap-1.5">
                  <span className="relative flex h-1.5 w-1.5">
@@ -187,9 +189,9 @@ export default async function Footer() {
               Disclaimer: All job details, dates and links are sourced from official government websites. We are not affiliated with any government organisation.
             </p>
             <div className="flex items-center gap-4 text-xs">
-              <Link href="/" className="text-blue-100/60 transition-colors hover:text-cyan-300">Privacy</Link>
-              <Link href="/" className="text-blue-100/60 transition-colors hover:text-cyan-300">Terms</Link>
-              <Link href="/" className="text-blue-100/60 transition-colors hover:text-cyan-300">Contact</Link>
+              <Link href="/privacy" className="text-blue-100/60 transition-colors hover:text-cyan-300">Privacy</Link>
+              <Link href="/terms" className="text-blue-100/60 transition-colors hover:text-cyan-300">Terms</Link>
+              <Link href="/contact" className="text-blue-100/60 transition-colors hover:text-cyan-300">Contact</Link>
             </div>
           </div>
         </div>

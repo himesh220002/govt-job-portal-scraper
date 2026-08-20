@@ -21,8 +21,17 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Govt Jobs Portal - Sarkari Result",
-  description: "Browse the latest government jobs, results, and admit cards.",
+  title: "DeshJob.com - India's #1 Govt Jobs & Sarkari Result Portal",
+  description: "Get real-time updates on latest government jobs, Sarkari results, admit cards, answer keys, and exam syllabus on DeshJob.com. Fast, reliable, and 100% secure.",
+  keywords: "Sarkari Result, Govt Jobs, Government Jobs 2026, Free Job Alert, SSC, UPSC, Bank Jobs, Railway Jobs, DeshJob, Desh Job",
+  openGraph: {
+    title: "DeshJob.com - Govt Jobs & Sarkari Results",
+    description: "The fastest, most reliable portal for Indian government job notifications, admit cards, and results.",
+    url: "https://deshjob.com",
+    siteName: "DeshJob",
+    locale: "en_IN",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

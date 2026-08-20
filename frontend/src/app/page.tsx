@@ -3,6 +3,7 @@ import clientPromise from '@/lib/mongodb';
 import { categorizeJobs } from '@/lib/categorize';
 import HeroSection from '@/components/HeroSection';
 import PortalUpdates from '@/components/PortalUpdates';
+import InfoSection from '@/components/InfoSection';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
@@ -38,6 +39,8 @@ export default async function Home() {
       <HeroSection />
       
       <PortalUpdates categorizedJobs={categorizedJobs} categoryOrder={categoryOrder} />
+      
+      <InfoSection />
     </main>
   );
 }
