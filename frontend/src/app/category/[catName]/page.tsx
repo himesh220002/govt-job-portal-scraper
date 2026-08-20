@@ -15,7 +15,7 @@ const getJobs = unstable_cache(
     const db = client.db('govtJobScraperDB');
     const jobs = await db.collection('scraper')
       .find({})
-      .project({ _id: 1, recordId: 1, title: 1, category: 1, scrapedAt: 1 })
+      .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1, lastOfficialUpdate: 1 })
       .toArray();
 
     return JSON.parse(JSON.stringify(jobs));

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TempCal - Calculator & Unit Converter</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-md bg-slate-800/80 backdrop-blur-xl border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden">
+        
+        <!-- Header & Tabs -->
+        <div class="p-5 pb-4 border-b border-slate-700/60 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                <span class="ml-2 font-bold tracking-wider text-sm bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">TEMPCAL</span>
+            </div>
+            
+            <!-- Tab Switcher -->
+            <div class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700/50">
+                <button id="calcTabBtn" onclick="switchTab('calc')" class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-indigo-600 text-white shadow-sm">Calculator</button>
+                <button id="convTabBtn" onclick="switchTab('conv')" class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-400 hover:text-slate-200">Converter</button>
+            </div>
+        </div>
+
+        <!-- Calculator Section -->
+        <div id="calcSection" class="p-5 space-y-4">
+            <!-- Display -->
+            <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 text-right space-y-1 shadow-inner">
+                <div id="calcHistory" class="text-xs text-slate-500 h-5 overflow-x-auto whitespace-nowrap"></div>
+                <div id="calcDisplay" class="text-3xl font-semibold tracking-wider text-slate-100 overflow-x-auto whitespace-nowrap">0</div>
+            </div>
+
+            <!-- Keypad -->
+            <div class="grid grid-cols-4 gap-2.5">
+                <button onclick="clearCalc()" class="p-3.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 font-semibold rounded-xl transition-all">AC</button>
+                <button onclick="appendCalc('(')" class="p-3.5 bg-slate-700/40 text-slate-300 hover:bg-slate-700/70 font-medium rounded-xl transition-all">(</button>
+                <button onclick="appendCalc(')')" class="p-3.5 bg-slate-700/40 text-slate-300 hover:bg-slate-700/70 font-medium rounded-xl transition-all">)</button>
+                <button onclick="appendCalc('/')" class="p-3.5 bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600/30 font-semibold rounded-xl transition-all">÷</button>
+
+                <button onclick="appendCalc('7')" class="p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">7</button>
+                <button onclick="appendCalc('8')" class="p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">8</button>
+                <button onclick="appendCalc('9')" class="p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">9</button>
+                <button onclick="appendCalc('*')" class="p-3.5 bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600/30 font-semibold rounded-xl transition-all">×</button>
+
+                <button onclick="appendCalc('4')" class="p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">4</button>
+                <button onclick="appendCalc('5')" class="p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">5</button>
+                <button onclick="appendCalc('6')" class="p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">6</button>
+                <button onclick="appendCalc('-')" class="p-3.5 bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600/30 font-semibold rounded-xl transition-all">-</button>
+
+                <button onclick="appendCalc('1')" class="p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">1</button>
+                <button onclick="appendCalc('2')" class="p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">2</button>
+                <button onclick="appendCalc('3')" class="p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">3</button>
+                <button onclick="appendCalc('+')" class="p-3.5 bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600/30 font-semibold rounded-xl transition-all">+</button>
+
+                <button onclick="appendCalc('0')" class="col-span-2 p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">0</button>
+                <button onclick="appendCalc('.')" class="p-3.5 bg-slate-700/20 text-slate-200 hover:bg-slate-700/50 font-medium rounded-xl transition-all">.</button>
+                <button onclick="calculateResult()" class="p-3.5 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all">=</button>
+            </div>
+        </div>
+
+        <!-- Unit Converter Section -->
+        <div id="convSection" class="p-5 space-y-4 hidden">
+            <!-- Category Selector -->
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1.5">Conversion Category</label>
+                <select id="unitCategory" onchange="updateUnits()" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                    <option value="length">Length</option>
+                    <option value="weight">Weight / Mass</option>
+                    <option value="temperature">Temperature</option>
+                    <option value="data">Data Storage</option>
+                </select>
+            </div>
+
+            <!-- From Unit & Input -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1.5">From</label>
+                    <select id="fromUnit" onchange="convertUnits()" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Value</label>
+                    <input type="number" id="fromValue" value="1" oninput="convertUnits()" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+            </div>
+
+            <!-- To Unit & Output -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1.5">To</label>
+                    <select id="toUnit" onchange="convertUnits()" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Result</label>
+                    <div id="toResult" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5 text-sm font-semibold text-cyan-400 flex items-center overflow-x-auto">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer credit -->
+        <div class="px-5 py-3 bg-slate-900/50 border-t border-slate-700/40 text-center text-[11px] text-slate-500">
+            TempCal &bull; Calculator & Converter Suite
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tab) {
+            const calcTab = document.getElementById('calcSection');
+            const convTab = document.getElementById('convSection');
+            const calcBtn = document.getElementById('calcTabBtn');
+            const convBtn = document.getElementById('convTabBtn');
+
+            if (tab === 'calc') {
+                calcTab.classList.remove('hidden');
+                convTab.classList.add('hidden');
+                calcBtn.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-indigo-600 text-white shadow-sm";
+                convBtn.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-400 hover:text-slate-200";
+            } else {
+                calcTab.classList.add('hidden');
+                convTab.classList.remove('hidden');
+                convBtn.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-indigo-600 text-white shadow-sm";
+                calcBtn.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-400 hover:text-slate-200";
+                updateUnits();
+            }
+        }
+
+        // Calculator Logic
+        let calcExpression = '';
+        let calcHistoryEl = document.getElementById('calcHistory');
+        let calcDisplayEl = document.getElementById('calcDisplay');
+
+        function appendCalc(val) {
+            if (calcExpression === 'Error' || calcExpression === 'Infinity') {
+                calcExpression = '';
+            }
+            calcExpression += val;
+            calcDisplayEl.innerText = calcExpression || '0';
+        }
+
+        function clearCalc() {
+            calcExpression = '';
+            calcDisplayEl.innerText = '0';
+            calcHistoryEl.innerText = '';
+        }
+
+        function calculateResult() {
+            if (!calcExpression) return;
+            try {
+                // Sanitize input for safe evaluation
+                let sanitized = calcExpression.replace(/×/g, '*').replace(/÷/g, '/');
+                // Basic check for safe characters
+                if (!/^[0-9+\-*/().\s]+$/.test(sanitized)) {
+                    throw new Error('Invalid characters');
+                }
+                let result = Function('"use strict";return (' + sanitized + ')')();
+                calcHistoryEl.innerText = calcExpression + ' =';
+                calcExpression = String(result);
+                calcDisplayEl.innerText = calcExpression;
+            } catch (e) {
+                calcHistoryEl.innerText = calcExpression + ' =';
+                calcExpression = 'Error';
+                calcDisplayEl.innerText = 'Error';
+            }
+        }
+
+        // Unit Converter Logic
+        const unitsData = {
+            length: {
+                m: { name: 'Meters', base: 1 },
+                km: { name: 'Kilometers', base: 1000 },
+                cm: { name: 'Centimeters', base: 0.01 },
+                mm: { name: 'Millimeters', base: 0.001 },
+                mi: { name: 'Miles', base: 1609.34 },
+                yd: { name: 'Yards', base: 0.9144 },
+                ft: { name: 'Feet', base: 0.3048 },
+                in: { name: 'Inches', base: 0.0254 }
+            },
+            weight: {
+                kg: { name: 'Kilograms', base: 1 },
+                g: { name: 'Grams', base: 0.001 },
+                mg: { name: 'Milligrams', base: 0.000001 },
+                lb: { name: 'Pounds', base: 0.453592 },
+                oz: { name: 'Ounces', base: 0.0283495 }
+            },
+            temperature: {
+                c: { name: 'Celsius' },
+                f: { name: 'Fahrenheit' },
+                k: { name: 'Kelvin' }
+            },
+            data: {
+                b: { name: 'Bytes', base: 1 },
+                kb: { name: 'Kilobytes', base: 1024 },
+                mb: { name: 'Megabytes', base: 1024 * 1024 },
+                gb: { name: 'Gigabytes', base: 1024 * 1024 * 1024 },
+                tb: { name: 'Terabytes', base: 1024 * 1024 * 1024 * 1024 }
+            }
+        };
+
+        function updateUnits() {
+            const category = document.getElementById('unitCategory').value;
+            const fromUnit = document.getElementById('fromUnit');
+            const toUnit = document.getElementById('toUnit');
+            
+            fromUnit.innerHTML = '';
+            toUnit.innerHTML = '';
+
+            const units = unitsData[category];
+            for (let key in units) {
+                fromUnit.add(new Option(units[key].name, key));
+                toUnit.add(new Option(units[key].name, key));
+            }
+            if (toUnit.options.length > 1) {
+                toUnit.selectedIndex = 1;
+            }
+            convertUnits();
+        }
+
+        function convertUnits() {
+            const category = document.getElementById('unitCategory').value;
+            const from = document.getElementById('fromUnit').value;
+            const to = document.getElementById('toUnit').value;
+            const val = parseFloat(document.getElementById('fromValue').value);
+            const resultEl = document.getElementById('toResult');
+
+            if (isNaN(val)) {
+                resultEl.innerText = '0';
+                return;
+            }
+
+            if (category === 'temperature') {
+                let celsius = val;
+                if (from === 'f') celsius = (val - 32) * 5/9;
+                if (from === 'k') celsius = val - 273.15;
+
+                let res = celsius;
+                if (to === 'f') res = celsius * 9/5 + 32;
+                if (to === 'k') res = celsius + 273.15;
+
+                resultEl.innerText = res.toFixed(4).replace(/\.?0+$/, '');
+            } else {
+                const units = unitsData[category];
+                const baseVal = val * units[from].base;
+                const finalVal = baseVal / units[to].base;
+                resultEl.innerText = finalVal.toPrecision(6).replace(/\.?0+$/, '');
+            }
+        }
+
+        // Initialize units on load
+        updateUnits();
+    </script>
+</body>
+</html>

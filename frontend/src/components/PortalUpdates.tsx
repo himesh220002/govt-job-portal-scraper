@@ -11,7 +11,8 @@ interface PortalJob {
   recordId: string;
   title: string;
   category: string;
-  scrapedAt?: string;
+  updatedAt?: string;
+  lastOfficialUpdate?: string;
 }
 
 const SORT_OPTIONS: { key: SortMode; label: string; icon: string }[] = [
@@ -52,8 +53,17 @@ export default function PortalUpdates({ categorizedJobs, categoryOrder }: { cate
       if (yearA !== yearB) {
         return yearB - yearA;
       }
-      const dateA = new Date(a.scrapedAt || 0).getTime();
-      const dateB = new Date(b.scrapedAt || 0).getTime();
+      const parseDate = (lastOfficialUpdate?: string, updatedAt?: string) => {
+        if (lastOfficialUpdate) {
+          const dateStr = lastOfficialUpdate.split('|')[0].trim();
+          const time = new Date(dateStr).getTime();
+          if (!isNaN(time)) return time;
+        }
+        return new Date(updatedAt || 0).getTime();
+      };
+      
+      const dateA = parseDate(a.lastOfficialUpdate, a.updatedAt);
+      const dateB = parseDate(b.lastOfficialUpdate, b.updatedAt);
       if (dateA !== dateB) {
         return dateB - dateA;
       }

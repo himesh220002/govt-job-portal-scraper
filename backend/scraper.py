@@ -100,6 +100,7 @@ def parse_job_detail_page(url):
         "organization": "",
         "examName": "",
         "shortDescription": "",
+        "lastOfficialUpdate": "",
         "importantDates": {"_raw": []},
         "applicationFee": {"_raw": []},
         "ageLimit": {},
@@ -107,7 +108,7 @@ def parse_job_detail_page(url):
         "howToApply": [],
         "importantLinks": {},
         "adsMeta": {},
-        "scrapedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "updatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "source_url": url  # Keeping this for traceability
     }
     
@@ -118,13 +119,18 @@ def parse_job_detail_page(url):
         
     tables = soup.find_all('table')
     
-    # Extract Short Information (usually in the first table)
+    # Extract Short Information and Post Update Date (usually in the first table)
     if tables:
         top_table = tables[0]
         for row in top_table.find_all('tr'):
             cells = row.find_all(['td', 'th'])
-            if len(cells) == 2 and "Short Information" in cells[0].get_text():
-                job_data["shortDescription"] = cells[1].get_text(strip=True)
+            if len(cells) >= 2:
+                label = cells[0].get_text(strip=True).lower()
+                value = cells[1].get_text(strip=True)
+                if "short information" in label:
+                    job_data["shortDescription"] = value
+                elif "post date" in label or "post update" in label:
+                    job_data["lastOfficialUpdate"] = value
 
     # 2. Extract Data from Nested Tables
     for table in tables:
@@ -191,20 +197,51 @@ def init_db():
     # Ensure indexes exist for rapid deduplication and querying
     collection.create_index("recordId", unique=True)
     collection.create_index("category")
-    collection.create_index([("scrapedAt", -1)])
+    collection.create_index([("updatedAt", -1)])
         
     return collection
 
 def batch_upsert_jobs(collection, jobs_data):
-    """Neutralizes database explosion via strict Upsert commands."""
+    """Neutralizes database explosion via strict Upsert commands and tracks real updates."""
     if not jobs_data:
         return
         
+    # Fetch existing records to compare
+    record_ids = [d["recordId"] for d in jobs_data]
+    existing_cursor = collection.find({"recordId": {"$in": record_ids}})
+    existing_jobs = {job["recordId"]: job for job in existing_cursor}
+        
     operations = []
     for data in jobs_data:
+        # Compare core fields to see if there's a real update
+        record_id = data["recordId"]
+        is_updated = True
+        if record_id in existing_jobs:
+            old_data = existing_jobs[record_id]
+            # Compare key fields that indicate a real change
+            fields_to_compare = [
+                "title", "shortDescription", "importantDates", 
+                "applicationFee", "ageLimit", "vacancyDetails", 
+                "importantLinks", "howToApply"
+            ]
+            
+            changes_found = False
+            for field in fields_to_compare:
+                if data.get(field) != old_data.get(field):
+                    changes_found = True
+                    break
+                    
+            if not changes_found:
+                is_updated = False
+                # Restore the old updatedAt so it doesn't change
+                if "updatedAt" in old_data:
+                    data["updatedAt"] = old_data["updatedAt"]
+                elif "scrapedAt" in old_data: # Fallback for old data
+                    data["updatedAt"] = old_data["scrapedAt"]
+
         operations.append(
             UpdateOne(
-                {"recordId": data["recordId"]},
+                {"recordId": record_id},
                 {"$set": data},
                 upsert=True
             )
@@ -253,18 +290,15 @@ def run_pipeline():
                     # Allow all links for certificate, important, offline, and outsourcing categories
                     all_links[link['url']] = link
                 else:
-                    # Determine allowed years for other categories
-                    if 'syllabus' in page_url or 'syllabus' in url_lower:
-                        allowed_years = ['2024', '2025', '2026']
-                    else:
-                        allowed_years = ['2026']
+                    current_year = datetime.now(timezone.utc).year
+                    allowed_years = [str(y) for y in range(current_year - 1, current_year + 6)]
                     
-                    # Filter by allowed years
+                    # Filter by dynamic allowed years
                     if any(year in url_lower for year in allowed_years):
                         all_links[link['url']] = link
                     
     final_links = list(all_links.values())
-    logger.info(f"Discovered {len(final_links)} unique job links for 2026 across all categories.")
+    logger.info(f"Discovered {len(final_links)} unique job links for the targeted year range across all categories.")
     
     extracted_jobs = []
     logger.info("Starting Extraction & Processing Phase...")
@@ -274,6 +308,11 @@ def run_pipeline():
         
         job_data = parse_job_detail_page(url)
         if job_data:
+            # Exclude jobs that have no importantLinks
+            if not job_data.get('importantLinks'):
+                logger.info(f"Skipping {url} as it has no importantLinks (empty page)")
+                continue
+
             # Fallback title if h1 is missing
             if 'title' not in job_data or not job_data['title']:
                 job_data['title'] = link_obj["title"]

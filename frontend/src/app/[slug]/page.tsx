@@ -46,7 +46,8 @@ interface JobDetail {
   title: string;
   shortDescription?: string;
   category?: string;
-  scrapedAt?: string;
+  updatedAt?: string;
+  lastOfficialUpdate?: string;
   importantDates?: { _raw?: RawItem[] };
   applicationFee?: { _raw?: RawItem[] };
   ageLimit?: { _raw?: RawItem[] };
@@ -84,11 +85,11 @@ function KeyValueRows({ pairs }: { pairs: { label: string; value: string }[] }) 
       {pairs.map((pair, i) => (
         <div key={i} className={`flex items-center justify-between gap-4 mb-2 rounded-lg hover:bg-slate-100 ${pair.label ? 'border-b border-slate-100 p-2 last:border-0' : ''}`}>
           {pair.label && (
-            <span className="w-fit shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-sm font-semibold text-slate-700">
+            <span className="w-fit shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs sm:text-sm font-semibold text-slate-700">
               {pair.label}
             </span>
           )}
-          <span className={`text-right text-sm ${pair.label ? 'w-full font-medium text-slate-900' : 'text-slate-600'}`}>
+          <span className={` text-xs sm:text-sm ${pair.label ? 'w-full text-right font-medium text-slate-900' : 'text-left p-1 text-slate-600'}`}>
             {pair.value}
           </span>
         </div>
@@ -137,7 +138,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
     job.vacancyDetails.forEach(row => {
       const headers = Object.keys(row);
       const headerKey = headers.join('|');
-      
+
       let table = vacancyTables.find(t => t.headers.join('|') === headerKey);
       if (!table) {
         table = { headers, rows: [] };
@@ -148,7 +149,11 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   }
 
   const parsePairs = (rawText: string) => {
-    const lines = cleanText(rawText).split('\n').map(l => l.trim()).filter(Boolean);
+    let text = cleanText(rawText);
+    // Fix broken dates split across lines with a slash, e.g., "18/12\n/2023"
+    text = text.replace(/\n\s*\//g, "/");
+
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     const result: { label: string, value: string }[] = [];
 
     // First pass: merge dangling colons and broken labels from 3-column table layouts
@@ -178,8 +183,17 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
       if (lower === 'important dates' || lower === 'application fee' || lower === 'age limit' || lower.includes('age relaxation')) continue;
 
       if (line.endsWith(':')) {
-        result.push({ label: line, value: mergedLines[i + 1] ? mergedLines[i + 1] : '' });
-        i++; // skip next line as it's the value
+        const label = line;
+        let value = '';
+        if (i + 1 < mergedLines.length) {
+          const nextLine = mergedLines[i + 1];
+          // If the next line is clearly another label (ends with ':' or contains ' : '), don't consume it as a value
+          if (!nextLine.endsWith(':') && !nextLine.includes(' : ')) {
+            value = nextLine;
+            i++;
+          }
+        }
+        result.push({ label, value });
       } else if (line.includes(':')) {
         const [l, ...v] = line.split(':');
         result.push({ label: l.trim() + ' :', value: v.join(':').trim() });
@@ -211,7 +225,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
         <div className="absolute top-0 right-1/5 h-56 w-56 rounded-full bg-cyan-400/20 blur-[100px] animate-blob [animation-delay:2s]" />
 
         <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 py-10 sm:py-14">
-          <div className="mt-6">
+          <div className="mt-6 p-4">
             {job.category && (
               <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide ${meta.badge}`}>
                 {job.category}
@@ -225,16 +239,18 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                 {cleanText(job.shortDescription)}
               </p>
             )}
-            {job.scrapedAt && (
-              <p className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-blue-200/70">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                Updated {new Date(job.scrapedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
-              </p>
+            {job.lastOfficialUpdate && (
+              <div className="mt-4 flex flex-col gap-1">
+                <p className="inline-flex items-center gap-2 text-xs font-medium text-emerald-300">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  Last Update: {job.lastOfficialUpdate}
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -290,7 +306,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-lg backdrop-blur-sm">📋</span>
               <h3 className="font-display text-base font-extrabold tracking-wide uppercase">Vacancy Details</h3>
             </div>
-            
+
             <div className="divide-y divide-slate-200">
               {vacancyTables.map((table, tableIdx) => (
                 <div key={tableIdx} className="w-full overflow-x-auto">

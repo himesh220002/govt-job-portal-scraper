@@ -38,8 +38,8 @@ async function performSearch(query: string) {
 
   const rawJobs = await db.collection('scraper')
     .find(filter)
-    .project({ _id: 1, recordId: 1, title: 1, category: 1, scrapedAt: 1 })
-    .sort({ scrapedAt: -1 })
+    .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1 })
+    .sort({ updatedAt: -1 })
     .limit(200)
     .toArray();
 
@@ -66,8 +66,17 @@ async function performSearch(query: string) {
       return numB - numA;
     }
 
-    const dateA = a.scrapedAt ? new Date(a.scrapedAt).getTime() : 0;
-    const dateB = b.scrapedAt ? new Date(b.scrapedAt).getTime() : 0;
+    const parseDate = (lastOfficialUpdate?: string, updatedAt?: string) => {
+      if (lastOfficialUpdate) {
+        const dateStr = lastOfficialUpdate.split('|')[0].trim();
+        const time = new Date(dateStr).getTime();
+        if (!isNaN(time)) return time;
+      }
+      return new Date(updatedAt || 0).getTime();
+    };
+
+    const dateA = parseDate(a.lastOfficialUpdate, a.updatedAt);
+    const dateB = parseDate(b.lastOfficialUpdate, b.updatedAt);
     return dateB - dateA;
   }).slice(0, 50);
 
@@ -134,7 +143,7 @@ async function ResultsSection({ query }: { query: string }) {
       {results.length > 0 ? (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <ul className="divide-y divide-slate-100">
-            {results.map((job: { _id: string; recordId: string; title: string; category: string; scrapedAt?: string }) => (
+            {results.map((job: { _id: string; recordId: string; title: string; category: string; updatedAt?: string; lastOfficialUpdate?: string }) => (
               <li key={job._id} className="group transition-colors hover:bg-slate-50/80">
                 <Link
                   href={`/${job.recordId}`}
@@ -155,7 +164,9 @@ async function ResultsSection({ query }: { query: string }) {
                           <line x1="8" y1="2" x2="8" y2="6"></line>
                           <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                        {job.scrapedAt ? new Date(job.scrapedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Recent'}
+                        {job.lastOfficialUpdate 
+                          ? job.lastOfficialUpdate.split('|')[0].trim() 
+                          : (job.updatedAt ? new Date(job.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Recent')}
                       </span>
                     </div>
                   </div>

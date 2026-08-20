@@ -24,7 +24,7 @@ const TICKER_ITEMS = [
 function LogoMark() {
   return (
     <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 shadow-lg shadow-blue-600/30 ring-1 ring-white/20 transition-transform duration-300 group-hover:scale-105">
-      <span className="text-lg font-extrabold tracking-tight text-white">GJ</span>
+      <span className="text-lg font-extrabold tracking-tight text-white">GJP</span>
       <div className="absolute -inset-1 rounded-xl bg-gradient-to-br from-blue-500/40 to-cyan-400/40 opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100" />
     </div>
   );
@@ -43,7 +43,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="relative z-50">
+    <>
       {/* Announcement ticker */}
       <div className="bg-gradient-to-r from-blue-950 via-indigo-900 to-blue-950 text-white overflow-hidden border-b border-white/10">
         <div className="max-w-7xl mx-auto flex items-center">
@@ -70,12 +70,11 @@ export default function Navbar() {
       </div>
 
       {/* Sticky glass navbar */}
-      <div
-        className={`sticky top-0 w-full transition-all duration-300 ${
-          scrolled
-            ? 'bg-white/80 backdrop-blur-xl border-b border-slate-200/70 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.15)]'
-            : 'bg-white/60 backdrop-blur-md border-b border-transparent'
-        }`}
+      <header
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled
+          ? 'bg-white/80 backdrop-blur-xl border-b border-slate-200/70 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.15)]'
+          : 'bg-white/60 backdrop-blur-md border-b border-transparent'
+          }`}
       >
         <nav className="max-w-7xl mx-auto flex h-16 md:h-[72px] items-center justify-between px-4 sm:px-6">
           {/* Brand */}
@@ -86,7 +85,7 @@ export default function Navbar() {
                 Govt<span className="text-gradient">Jobs</span> Portal
               </span>
               <span className="block text-[11px] sm:text-xs font-medium tracking-wide text-slate-500">
-                Your Gateway to Sarkari Success
+                Your Sarkari Gateway
               </span>
             </div>
           </Link>
@@ -99,15 +98,13 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative px-4 py-2 text-sm font-semibold transition-colors group ${
-                    active ? 'text-blue-700' : 'text-slate-600 hover:text-blue-700'
-                  }`}
+                  className={`relative px-4 py-2 text-sm font-semibold transition-colors group ${active ? 'text-blue-700' : 'text-slate-600 hover:text-blue-700'
+                    }`}
                 >
                   {link.label}
                   <span
-                    className={`absolute left-4 right-4 -bottom-0.5 h-0.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 transition-transform duration-300 origin-left ${
-                      active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                    }`}
+                    className={`absolute left-4 right-4 -bottom-0.5 h-0.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 transition-transform duration-300 origin-left ${active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                      }`}
                   />
                 </Link>
               );
@@ -116,7 +113,7 @@ export default function Navbar() {
 
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link
+            {/* <Link
               href="/search"
               className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-slate-700 border border-slate-200 bg-white/70 hover:border-blue-300 hover:text-blue-700 transition-all shadow-sm"
             >
@@ -125,7 +122,7 @@ export default function Navbar() {
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
               Quick Search
-            </Link>
+            </Link> */}
             <Link
               href="/category/latest-job"
               className="group relative overflow-hidden rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition-all hover:shadow-xl hover:shadow-blue-600/40 hover:scale-[1.03] active:scale-95"
@@ -156,9 +153,8 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         <div
-          className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            open ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'
-          }`}
+          className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${open ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'
+            }`}
         >
           <div className="mx-4 mb-4 space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-900/5">
             <SearchBar variant="light" onSubmitted={() => setOpen(false)} />
@@ -170,11 +166,10 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                      active
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-slate-700 hover:bg-slate-50 hover:text-blue-700'
-                    }`}
+                    className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${active
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-slate-700 hover:bg-slate-50 hover:text-blue-700'
+                      }`}
                   >
                     {link.label}
                   </Link>
@@ -190,7 +185,7 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

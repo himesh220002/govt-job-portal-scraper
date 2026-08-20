@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import clientPromise from '@/lib/mongodb';
 
 const quickLinks = [
   { label: 'Home', href: '/' },
@@ -63,7 +64,20 @@ const socials = [
   },
 ];
 
-export default function Footer() {
+export default async function Footer() {
+  const client = await clientPromise;
+  const db = client.db('govtJobScraperDB');
+  const latestJob = await db.collection('scraper')
+    .find({})
+    .sort({ updatedAt: -1 })
+    .project({ updatedAt: 1 })
+    .limit(1)
+    .toArray();
+    
+  const lastScraped = latestJob.length > 0 && latestJob[0].updatedAt 
+    ? new Date(latestJob[0].updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : 'Unknown';
+
   return (
     <footer className="relative overflow-hidden bg-[#070b1d] text-slate-300">
       <div className="absolute inset-0 bg-gradient-to-br from-[#0a1330] via-[#0d1f4e] to-[#1e3a8a]" />
@@ -157,9 +171,18 @@ export default function Footer() {
 
         <div className="mt-12 border-t border-white/10 pt-6">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <p className="text-xs text-blue-100/60">
-              © {new Date().getFullYear()} GovtJobs Portal. All rights reserved.
-            </p>
+            <div className="flex flex-col gap-1.5">
+              <p className="text-xs text-blue-100/60">
+                © {new Date().getFullYear()} GovtJobs Portal. All rights reserved.
+              </p>
+              <p className="text-[10px] text-emerald-400/80 font-medium tracking-wider uppercase flex items-center gap-1.5">
+                 <span className="relative flex h-1.5 w-1.5">
+                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                 </span>
+                 Portal Last Updated: {lastScraped}
+              </p>
+            </div>
             <p className="max-w-xl text-center text-xs text-blue-100/50 sm:text-right">
               Disclaimer: All job details, dates and links are sourced from official government websites. We are not affiliated with any government organisation.
             </p>

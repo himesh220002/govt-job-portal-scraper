@@ -11,7 +11,8 @@ interface CategoryJob {
   recordId: string;
   title: string;
   category: string;
-  scrapedAt?: string;
+  updatedAt?: string;
+  lastOfficialUpdate?: string;
 }
 
 const SORT_OPTIONS: { key: SortMode; label: string; icon: string }[] = [
@@ -52,8 +53,17 @@ export default function CategoryJobList({ originalCatName, categoryJobs }: { ori
       if (yearA !== yearB) {
         return yearB - yearA;
       }
-      const dateA = new Date(a.scrapedAt || 0).getTime();
-      const dateB = new Date(b.scrapedAt || 0).getTime();
+      const parseDate = (lastOfficialUpdate?: string, updatedAt?: string) => {
+        if (lastOfficialUpdate) {
+          const dateStr = lastOfficialUpdate.split('|')[0].trim();
+          const time = new Date(dateStr).getTime();
+          if (!isNaN(time)) return time;
+        }
+        return new Date(updatedAt || 0).getTime();
+      };
+      
+      const dateA = parseDate(a.lastOfficialUpdate, a.updatedAt);
+      const dateB = parseDate(b.lastOfficialUpdate, b.updatedAt);
       if (dateA !== dateB) {
         return dateB - dateA;
       }
@@ -130,7 +140,7 @@ export default function CategoryJobList({ originalCatName, categoryJobs }: { ori
                       <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold ${meta.badge}`}>
                         {job.category}
                       </span>
-                      {job.scrapedAt && (
+                      {(job.lastOfficialUpdate || job.updatedAt) && (
                         <span className="inline-flex items-center gap-1 text-slate-500">
                           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -138,7 +148,9 @@ export default function CategoryJobList({ originalCatName, categoryJobs }: { ori
                             <line x1="8" y1="2" x2="8" y2="6"></line>
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                           </svg>
-                          {new Date(job.scrapedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          {job.lastOfficialUpdate 
+                            ? job.lastOfficialUpdate.split('|')[0].trim() 
+                            : (job.updatedAt ? new Date(job.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '')}
                         </span>
                       )}
                     </div>
