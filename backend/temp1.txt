@@ -74,3 +74,5 @@ https://nta.ac.in/Downloads
 
 PGIMER Chandigarh → Postgraduate medical admissions
 https://pgimer.edu.in/PGIMER_PORTAL/PGIMERPORTAL/home.jsp
+
+State Medical Councils → Example: WB Medical Council, UP Medical Council (state‑specific portals).

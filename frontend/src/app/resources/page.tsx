@@ -154,7 +154,7 @@ export default function ResourcesPage() {
                 <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${category.gradient} text-2xl text-white shadow-lg`}>
                   {category.icon}
                 </span>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+                <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900">
                   {category.title}
                 </h2>
               </div>

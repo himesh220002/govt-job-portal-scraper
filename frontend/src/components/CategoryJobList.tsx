@@ -61,7 +61,7 @@ export default function CategoryJobList({ originalCatName, categoryJobs }: { ori
         }
         return new Date(updatedAt || 0).getTime();
       };
-      
+
       const dateA = parseDate(a.lastOfficialUpdate, a.updatedAt);
       const dateB = parseDate(b.lastOfficialUpdate, b.updatedAt);
       if (dateA !== dateB) {
@@ -88,17 +88,16 @@ export default function CategoryJobList({ originalCatName, categoryJobs }: { ori
         </div>
 
         {/* Segmented sort control */}
-        <div className="inline-flex w-full items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm md:w-auto">
+        <div className="inline-flex w-fit items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm md:w-auto">
           <span className="hidden sm:inline px-3 text-sm font-semibold text-slate-500">Sort by</span>
           {SORT_OPTIONS.map((opt) => (
             <button
               key={opt.key}
               onClick={() => setSortMode(opt.key)}
-              className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-                sortMode === opt.key
+              className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${sortMode === opt.key
                   ? `bg-gradient-to-r ${meta.header} text-white shadow-md`
                   : 'text-slate-600 hover:bg-slate-100 hover:text-blue-700'
-              }`}
+                }`}
             >
               <span className="text-xs">{opt.icon}</span>
               {opt.label}
@@ -148,8 +147,8 @@ export default function CategoryJobList({ originalCatName, categoryJobs }: { ori
                             <line x1="8" y1="2" x2="8" y2="6"></line>
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                           </svg>
-                          {job.lastOfficialUpdate 
-                            ? job.lastOfficialUpdate.split('|')[0].trim() 
+                          {job.lastOfficialUpdate
+                            ? job.lastOfficialUpdate.split('|')[0].trim()
                             : (job.updatedAt ? new Date(job.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '')}
                         </span>
                       )}

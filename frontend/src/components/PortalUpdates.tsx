@@ -61,7 +61,7 @@ export default function PortalUpdates({ categorizedJobs, categoryOrder }: { cate
         }
         return new Date(updatedAt || 0).getTime();
       };
-      
+
       const dateA = parseDate(a.lastOfficialUpdate, a.updatedAt);
       const dateB = parseDate(b.lastOfficialUpdate, b.updatedAt);
       if (dateA !== dateB) {
@@ -90,17 +90,16 @@ export default function PortalUpdates({ categorizedJobs, categoryOrder }: { cate
         </div>
 
         {/* Segmented sort control */}
-        <div className="inline-flex w-full items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm md:w-auto">
+        <div className="inline-flex w-fit items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm md:w-auto">
           <span className="hidden sm:inline px-3 text-sm font-semibold text-slate-500">Sort by</span>
           {SORT_OPTIONS.map((opt) => (
             <button
               key={opt.key}
               onClick={() => setSortMode(opt.key)}
-              className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-                sortMode === opt.key
+              className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${sortMode === opt.key
                   ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-blue-700'
-              }`}
+                }`}
             >
               <span className="text-xs">{opt.icon}</span>
               {opt.label}

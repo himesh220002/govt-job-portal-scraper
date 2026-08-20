@@ -162,7 +162,7 @@ export default function HeroSection() {
           <div className="mx-auto mt-9 max-w-2xl animate-fade-up [animation-delay:300ms]">
             <SearchBar />
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-blue-200/70">Trending:</span>
+              {/* <span className="text-xs font-semibold uppercase tracking-wider text-blue-200/70">Trending:</span> */}
               {popularSearches.map((term) => (
                 <Link
                   key={term}

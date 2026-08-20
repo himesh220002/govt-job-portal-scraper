@@ -5,6 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SearchBar from './SearchBar';
 
+let BhashaSwitch: any;
+if (typeof window !== 'undefined') {
+  BhashaSwitch = require('bhasha-switch');
+}
+
 const NAV_LINKS = [
   { label: 'Home', href: '/' },
   { label: 'Latest Jobs', href: '/category/latest-job' },
@@ -39,8 +44,36 @@ export default function Navbar() {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
+
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Re-initialize language switcher whenever mobile menu opens/closes
+  // BhashaSwitch automatically cleans up old instances and remembers the language
+  useEffect(() => {
+    if (BhashaSwitch) {
+      // Small timeout to ensure the DOM elements are rendered
+      const timer = setTimeout(() => {
+        const containerSelector = open ? '#bhasha-nav-mobile-container' : '#bhasha-nav-container';
+
+        // Ensure the container actually exists in the DOM before initializing
+        if (document.querySelector(containerSelector)) {
+          try {
+            BhashaSwitch.init({
+              container: containerSelector,
+              accent: '#2563eb',
+              radius: '9999px',
+              border: '#e2e8f0',
+              position: 'bottom-right'
+            });
+          } catch (e) {
+            console.error('Failed to init bhasha-switch:', e);
+          }
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [open, pathname]);
 
   return (
     <>
@@ -123,6 +156,7 @@ export default function Navbar() {
               </svg>
               Quick Search
             </Link> */}
+            <div id="bhasha-nav-container" className="h-10 flex items-center justify-center"></div>
             <Link
               href="/category/latest-job"
               className="group relative overflow-hidden rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition-all hover:shadow-xl hover:shadow-blue-600/40 hover:scale-[1.03] active:scale-95"
@@ -153,12 +187,16 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         <div
-          className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${open ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'
+          className={`lg:hidden absolute top-full left-0 w-full bg-white backdrop-blur-xl border-t border-slate-200 transition-all duration-300 ease-in-out overflow-y-auto flex flex-col shadow-2xl ${open ? 'h-[calc(100vh-64px)] opacity-100 pointer-events-auto' : 'h-0 opacity-0 pointer-events-none'
             }`}
         >
-          <div className="mx-4 mb-4 space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-900/5">
+          <div className="flex flex-col p-6 mt-6 space-y-6 flex-1">
             <SearchBar variant="light" onSubmitted={() => setOpen(false)} />
-            <div className="flex flex-col gap-1 pt-2">
+
+            {/* Mobile language switch container */}
+            <div id="bhasha-nav-mobile-container" className="h-12 flex items-center justify-center w-full overflow-hidden"></div>
+
+            <div className="flex flex-col items-center gap-2 pt-2">
               {NAV_LINKS.map((link) => {
                 const active = pathname === link.href;
                 return (
@@ -166,21 +204,24 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${active
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-slate-700 hover:bg-slate-50 hover:text-blue-700'
+                    className={`rounded-xl px-5 py-4 w-full text-center text-base font-bold transition-all ${active
+                      ? 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100'
+                      : 'text-slate-700 border border-transparent hover:bg-slate-50 hover:text-blue-700'
                       }`}
                   >
                     {link.label}
                   </Link>
                 );
               })}
+            </div>
+
+            <div className="mt-auto pt-6 border-t border-slate-200 pb-8">
               <Link
                 href="/category/latest-job"
                 onClick={() => setOpen(false)}
-                className="mt-1 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-center text-sm font-bold text-white shadow-lg shadow-blue-600/25"
+                className="flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-4 text-center text-base font-bold text-white shadow-lg shadow-blue-600/25 active:scale-95 transition-transform"
               >
-                Explore Jobs
+                Explore All Jobs
               </Link>
             </div>
           </div>
