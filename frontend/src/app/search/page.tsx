@@ -38,7 +38,7 @@ async function performSearch(query: string) {
 
   const rawJobs = await db.collection('scraper')
     .find(filter)
-    .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1 })
+    .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1, lastOfficialUpdate: 1 })
     .sort({ updatedAt: -1 })
     .limit(200)
     .toArray();
