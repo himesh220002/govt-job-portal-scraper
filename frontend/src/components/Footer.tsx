@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import clientPromise from '@/lib/mongodb';
 
 const quickLinks = [
@@ -92,21 +93,21 @@ export default async function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link href="/" className="group flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 shadow-lg shadow-blue-600/30 ring-1 ring-white/20">
-                <span className="text-lg font-extrabold tracking-tight text-white">SL</span>
+              <div className="h-12 w-12 lg:h-22 lg:w-22 rounded-full overflow-hidden">
+                <Image src="/logo/sarkarlinklogo.png" alt="SarkarLink" width={100} height={100} className="object-cover scale-120" priority />
               </div>
               <div className="leading-tight">
-                <span className="block font-display text-lg font-extrabold tracking-tight text-white">
+                <span className="block font-display text-lg xl:text-2xl font-extrabold tracking-tight text-white">
                   Sarkar<span className="text-gradient">Link</span>
                 </span>
-                <span className="block text-xs font-medium text-blue-200/70">
+                <span className="block text-xs xl:text-base font-medium text-blue-200/70">
                   India's Govt Job Portal
                 </span>
               </div>
             </Link>
 
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-blue-100/70">
-              India&apos;s most trusted destination for government job notifications, Sarkari results, admit cards, answer keys and exam syllabi — updated daily from verified official sources.
+              SarkarLink is India&apos;s most trusted destination for Sarkari Naukri and Govt Jobs. Get real-time updates for Sarkari Result, Sarkari Exam, admit cards, and syllabus. Whether you need Sarkari Result 2026, Sarkari Network updates, or Sarkari Job Find, we bring you fast and verified information.
             </p>
 
             <div className="mt-6 flex items-center gap-3">

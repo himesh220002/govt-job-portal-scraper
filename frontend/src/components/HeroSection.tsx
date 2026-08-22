@@ -66,13 +66,13 @@ const FEATURES = [
 ];
 
 const SectionHeading = ({ icon, chip, title, subtitle }: { icon: React.ReactNode; chip: string; title: string; subtitle?: string }) => (
-  <div className="mb-8 flex flex-col sm:flex-row sm:items-center gap-4">
+  <div className="mb-4 sm:mb-8 flex items-center justify-center sm:justify-start gap-4">
     <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${chip} text-xl shadow-md`}>
       {icon}
     </span>
     <div>
-      <h2 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">{title}</h2>
-      {subtitle && <p className="mt-1 text-sm sm:text-base text-slate-500">{subtitle}</p>}
+      <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900">{title}</h2>
+      {subtitle && <p className="mt-1 text-xs sm:text-base text-slate-500">{subtitle}</p>}
     </div>
     <div className="hidden sm:block sm:flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent ml-4" />
   </div>
@@ -99,21 +99,21 @@ const Card = ({
   return (
     <Link
       href={link}
-      className={`group card-hover relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border bg-white p-6 shadow-sm ${styles[variant as keyof typeof styles]}`}
+      className={`group card-hover relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border bg-white p-3 ms:p-6 shadow-sm ${styles[variant as keyof typeof styles]}`}
     >
       <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br from-blue-500/10 to-cyan-400/10 blur-2xl transition-opacity duration-300 opacity-0 group-hover:opacity-100" />
 
       <div className="relative">
-        <h3 className="mb-2 font-display text-lg font-bold leading-snug text-slate-900 transition-colors group-hover:text-blue-700 line-clamp-2">
+        <h3 className="mb-2 font-display text-md sm:text-lg font-bold leading-snug text-slate-900 transition-colors group-hover:text-blue-700 line-clamp-2">
           {title}
         </h3>
-        <p className="mb-4 text-sm text-slate-500">{fact}</p>
+        <p className="mb-4 text-xs sm:text-sm text-slate-500">{fact}</p>
       </div>
 
-      <span className="relative inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600">
+      <span className="relative inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-600">
         {cta}
-        <svg className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+        <svg className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 12h14M12 5l7 7-7 7" />
         </svg>
       </span>
@@ -182,7 +182,7 @@ export default function HeroSection() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3 animate-fade-up [animation-delay:400ms]">
             <Link
               href="/category/latest-job"
-              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-cyan-400 to-blue-600 px-7 py-3.5 text-sm font-bold text-white shadow-xl shadow-blue-600/30 transition-all hover:shadow-2xl hover:shadow-cyan-500/30 hover:scale-[1.03] active:scale-95"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-cyan-400 to-blue-600 px-4 py-2 md:px-7 md:py-3.5 text-sm font-bold text-white shadow-xl shadow-blue-600/30 transition-all hover:shadow-2xl hover:shadow-cyan-500/30 hover:scale-[1.03] active:scale-95"
             >
               <span className="relative z-10 flex items-center gap-2">
                 Browse Latest Jobs
@@ -194,14 +194,14 @@ export default function HeroSection() {
             </Link>
             <Link
               href="/category/result"
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-cyan-300/40 hover:scale-[1.03] active:scale-95"
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 md:px-7 md:py-3.5 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-cyan-300/40 hover:scale-[1.03] active:scale-95"
             >
               View Results
             </Link>
           </div>
 
           {/* Feature strip */}
-          <div className="mx-auto mt-14 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3 animate-fade-up [animation-delay:500ms]">
+          <div className="mx-auto mt-14 grid w-fit sm:w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3 animate-fade-up [animation-delay:500ms]">
             {FEATURES.map((f) => (
               <div key={f.title} className="glass-dark flex items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-transform duration-300 hover:-translate-y-1">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/30 to-cyan-400/30 text-cyan-200 ring-1 ring-white/10">
@@ -239,22 +239,22 @@ export default function HeroSection() {
 
       {/* ---------- Featured sections ---------- */}
       <section className="bg-slate-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-20">
           {/* Top 5 Exams */}
-          <div className="mb-14">
+          <div className="mb-8 sm:mb-14">
             <SectionHeading
               icon={<span className="text-xl">🎓</span>}
               chip="bg-blue-100 text-blue-800"
               title="Top 5 Government Exams"
               subtitle="India · 2026 · Prelims, Mains & result dates"
             />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
               {topExams.map((item, i) => <Card key={i} {...item} variant="highlight" />)}
             </div>
           </div>
 
           {/* Jobs + Admissions */}
-          <div className="mb-14 grid grid-cols-1 gap-12 xl:grid-cols-2">
+          <div className="mb-8 sm:mb-14 grid grid-cols-1 gap-12 xl:grid-cols-2">
             <div>
               <SectionHeading
                 icon={<span className="text-xl">💼</span>}
@@ -262,7 +262,7 @@ export default function HeroSection() {
                 title="Top Government Jobs"
                 subtitle="Openings across Railways, SSC & Banks"
               />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                 {topJobs.map((item, i) => <Card key={i} {...item} />)}
               </div>
             </div>
@@ -273,7 +273,7 @@ export default function HeroSection() {
                 title="Top Admissions"
                 subtitle="IIT, IIM, NEET & AIIMS counselling"
               />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                 {topAdmissions.map((item, i) => <Card key={i} {...item} />)}
               </div>
             </div>
@@ -288,7 +288,7 @@ export default function HeroSection() {
                 title="Latest Answer Keys"
                 subtitle="NTA, SSC & Railway official keys"
               />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 grid-cols-2">
                 {latestAnswerKeys.map((item, i) => <Card key={i} {...item} />)}
               </div>
             </div>
@@ -299,7 +299,7 @@ export default function HeroSection() {
                 title="Top Exam Syllabus"
                 subtitle="UPSC, SSC CGL & RRB NTPC complete syllabus"
               />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                 {topSyllabus.map((item, i) => <Card key={i} {...item} />)}
               </div>
             </div>

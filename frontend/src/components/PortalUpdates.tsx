@@ -75,15 +75,15 @@ export default function PortalUpdates({ categorizedJobs, categoryOrder }: { cate
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-20">
-      <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div className="mb-10 flex flex-col gap-3 sm:gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="flex items-center gap-3">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-xl text-white shadow-lg shadow-blue-600/25">
               🔄
             </span>
             <div>
-              <h2 className="font-display text-3xl font-extrabold tracking-tight text-slate-900">Latest Portal Updates</h2>
-              <p className="mt-1 text-slate-500">Browse through all recent Sarkari Results and Job Postings.</p>
+              <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900">Latest Portal Updates</h2>
+              <p className="mt-1 text-sm sm:tex-lg text-slate-500">Browse through all recent Sarkari Results and Job Postings.</p>
             </div>
             <span className="hidden sm:block h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent ml-4" />
           </div>
@@ -91,14 +91,14 @@ export default function PortalUpdates({ categorizedJobs, categoryOrder }: { cate
 
         {/* Segmented sort control */}
         <div className="inline-flex w-fit items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm md:w-auto">
-          <span className="hidden sm:inline px-3 text-sm font-semibold text-slate-500">Sort by</span>
+          <span className="hidden lg:inline px-3 text-sm font-semibold text-slate-500">Sort by</span>
           {SORT_OPTIONS.map((opt) => (
             <button
               key={opt.key}
               onClick={() => setSortMode(opt.key)}
-              className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${sortMode === opt.key
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-blue-700'
+              className={`flex items-center gap-1.5 rounded-xl px-2 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold transition-all duration-200 ${sortMode === opt.key
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-blue-700'
                 }`}
             >
               <span className="text-xs">{opt.icon}</span>

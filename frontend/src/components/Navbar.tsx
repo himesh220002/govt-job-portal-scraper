@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import SearchBar from './SearchBar';
 
@@ -28,9 +29,8 @@ const TICKER_ITEMS = [
 
 function LogoMark() {
   return (
-    <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 shadow-lg shadow-blue-600/30 ring-1 ring-white/20 transition-transform duration-300 group-hover:scale-105">
-      <span className="text-lg font-extrabold tracking-tight text-white">SL</span>
-      <div className="absolute -inset-1 rounded-xl bg-gradient-to-br from-blue-500/40 to-cyan-400/40 opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100" />
+    <div className="h-11 w-11 sm:h-14 sm:w-14 rounded-full overflow-hidden">
+      <Image src="/logo/sarkarlinklogo.png" alt="SarkarLink" width={100} height={100} className="object-cover scale-120" priority />
     </div>
   );
 }
@@ -115,7 +115,7 @@ export default function Navbar() {
             <LogoMark />
             <div className="leading-tight">
               <span className="block font-display text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
-                Sarkar<span className="text-gradient">Link</span>
+                Sarkar<span className="bg-gradient-to-b from-blue-600 to-green-600 text-transparent bg-clip-text">Link</span>
               </span>
               <span className="block text-[11px] sm:text-xs font-medium tracking-wide text-slate-500">
                 India's Govt Job Portal

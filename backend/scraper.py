@@ -5,10 +5,27 @@ import logging
 from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 from pymongo import MongoClient, UpdateOne
-from pymongo.errors import ConnectionFailure
+from pymongo.errors import ConnectionFailure, BulkWriteError
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 from urllib.parse import urlparse
+
+def categorize_job(title, record_id):
+    slug = (record_id or "").lower()
+    title = (title or "").lower()
+    
+    def match(word):
+        return word in slug or word in title
+        
+    if match('result'): return 'Result'
+    elif match('admit card') or match('admitcard'): return 'Admit Card'
+    elif match('answer key') or match('answerkey'): return 'Answer Key'
+    elif match('syllabus'): return 'Syllabus'
+    elif match('admission'): return 'Admission'
+    elif match('certificate'): return 'Certificate'
+    elif match('offline') or match('outsourcing'): return 'Outsourcing/Offline Job'
+    elif match('important') or match('scholarship'): return 'Important'
+    else: return 'Latest Job'
 
 # Load environment variables from .env file
 load_dotenv()
@@ -316,7 +333,7 @@ def run_pipeline():
             # Fallback title if h1 is missing
             if 'title' not in job_data or not job_data['title']:
                 job_data['title'] = link_obj["title"]
-            job_data['category'] = "Latest Job" # Stub logic
+            job_data['category'] = categorize_job(job_data['title'], job_data.get('recordId', ''))
             
             extracted_jobs.append(job_data)
             

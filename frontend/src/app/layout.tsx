@@ -21,17 +21,28 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SarkarLink.com - India's #1 Govt Jobs & Sarkari Result Portal",
-  description: "Get real-time updates on latest government jobs, Sarkari results, admit cards, answer keys, and exam syllabus on SarkarLink.com. Fast, reliable, and 100% secure.",
-  keywords: "Sarkari Result, Govt Jobs, Government Jobs 2026, Free Job Alert, SSC, UPSC, Bank Jobs, Railway Jobs, SarkarLink, Sarkar Link",
+  title: "SarkarLink.com - Sarkari Result, Sarkari Exam & Govt Jobs Portal",
+  description: "SarkarLink.com is your trusted portal for Sarkari Result, Sarkari Exam, and Sarkari Naukri. Get real-time updates on latest government jobs, Sarkari results 2025/2026, admit cards, answer keys, and exam sarkari result info.",
+  keywords: "Sarkari Result, Sarkari Exam, Sarkari Naukri, Sarkari Job, Sarkari Result 2026, Sarkari Result 2025, Sarkari Network, Sarkari Vigyapan, Exam Sarkari Result Info, Sarkari Vle, Sarkari Job Marg, Sarkari Sangam, Sarkari Job Find, Naukri, Govt Jobs, Government Jobs 2026, Free Job Alert, SSC, UPSC, Bank Jobs, Railway Jobs, SarkarLink",
   openGraph: {
-    title: "SarkarLink.com - Govt Jobs & Sarkari Results",
-    description: "Your trusted gateway for latest government jobs, Sarkari results, and study resources.",
+    title: "SarkarLink.com - Sarkari Result & Sarkari Naukri",
+    description: "Your trusted gateway for latest government jobs, Sarkari results 2026, Sarkari Exam updates, and study resources.",
     url: "https://sarkarlink.com",
     siteName: "SarkarLink",
     locale: "en_IN",
     type: "website",
   },
+  icons: {
+    icon: [
+      { url: '/logo/favicon.ico' },
+      { url: '/logo/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/logo/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/logo/apple-touch-icon.png' },
+    ],
+  },
+  manifest: '/logo/site.webmanifest',
 };
 
 export default function RootLayout({
