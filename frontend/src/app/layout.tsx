@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -7,6 +7,7 @@ import NextTopLoader from "nextjs-toploader";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -45,6 +46,10 @@ export const metadata: Metadata = {
   manifest: '/logo/site.webmanifest',
 };
 
+export const viewport: Viewport = {
+  themeColor: "#050914",
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -55,6 +60,7 @@ export default function RootLayout({
       <body className="bg-slate-50 text-slate-900 font-sans antialiased">
         <NextTopLoader color="#2563eb" showSpinner={false} />
         <ScrollToTop />
+        <ServiceWorkerRegister />
         <Navbar />
         <main className="flex min-h-screen flex-col">{children}</main>
         <Footer />
