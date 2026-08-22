@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import clientPromise from '@/lib/mongodb';
 import SearchBar from '@/components/SearchBar';
+import SortController from '@/components/SortController';
+import CategoryFilter from '@/components/CategoryFilter';
 
 export const dynamic = 'force-dynamic'; // Since search params are dynamic
 
@@ -11,10 +13,8 @@ const STOP_WORDS = [
   'syllabus', 'sarkari', 'post', 'posts', 'recruitment', 'online', 'form'
 ];
 
-async function performSearch(query: string) {
-  if (!query) return [];
-
-  const rawWords = query.toLowerCase().split(/\s+/);
+async function performSearch(query: string, sort: string, categoryFilter: string | null) {
+  const rawWords = query ? query.toLowerCase().split(/\s+/) : [];
   const keywords = rawWords.filter(word => !STOP_WORDS.includes(word) && word.length > 1);
 
   const client = await clientPromise;
@@ -22,7 +22,7 @@ async function performSearch(query: string) {
 
   let filter = {};
 
-  if (keywords.length > 0) {
+  if (rawWords.length > 0) {
     const andClauses = keywords.map(kw => ({
       $or: [
         { title: { $regex: kw, $options: 'i' } },
@@ -30,20 +30,37 @@ async function performSearch(query: string) {
       ]
     }));
 
-    filter = { $and: andClauses };
+    if (andClauses.length > 0) {
+      filter = { $and: andClauses };
+    } else {
+      const categoryMatches = rawWords.map(w => ({ category: { $regex: w, $options: 'i' } }));
+      filter = { $or: categoryMatches };
+    }
   } else {
-    const categoryMatches = rawWords.map(w => ({ category: { $regex: w, $options: 'i' } }));
-    filter = { $or: categoryMatches };
+    filter = {}; // Return all records if no query is provided
+  }
+
+  if (categoryFilter) {
+    if (Object.keys(filter).length === 0) {
+      filter = { category: categoryFilter };
+    } else {
+      filter = { $and: [{ category: categoryFilter }, filter] };
+    }
   }
 
   const rawJobs = await db.collection('scraper')
     .find(filter)
     .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1, lastOfficialUpdate: 1 })
     .sort({ updatedAt: -1 })
-    .limit(200)
     .toArray();
 
   const jobs = rawJobs.sort((a, b) => {
+    if (sort === 'a-z') {
+      return (a.title || '').localeCompare(b.title || '');
+    } else if (sort === 'z-a') {
+      return (b.title || '').localeCompare(a.title || '');
+    }
+
     const getFourDigits = (recordId: string, title: string) => {
       const combined = `${recordId} ${title}`;
       const matches = combined.match(/(?<!\d)\d{4}(?!\d)/g);
@@ -59,12 +76,7 @@ async function performSearch(query: string) {
       return 0;
     };
 
-    const numA = getFourDigits(a.recordId, a.title);
-    const numB = getFourDigits(b.recordId, b.title);
 
-    if (numA !== numB) {
-      return numB - numA;
-    }
 
     const parseDate = (lastOfficialUpdate?: string, updatedAt?: string) => {
       if (lastOfficialUpdate) {
@@ -77,8 +89,24 @@ async function performSearch(query: string) {
 
     const dateA = parseDate(a.lastOfficialUpdate, a.updatedAt);
     const dateB = parseDate(b.lastOfficialUpdate, b.updatedAt);
-    return dateB - dateA;
-  }).slice(0, 50);
+
+    if (sort === 'oldest') {
+      if (dateA !== dateB) {
+        return dateA - dateB; // Ascending date
+      }
+      const numA = getFourDigits(a.recordId, a.title);
+      const numB = getFourDigits(b.recordId, b.title);
+      return numA - numB; // Ascending year fallback
+    }
+
+    // Default: newest
+    if (dateA !== dateB) {
+      return dateB - dateA; // Descending date
+    }
+    const numA = getFourDigits(a.recordId, a.title);
+    const numB = getFourDigits(b.recordId, b.title);
+    return numB - numA; // Descending year fallback
+  });
 
   return JSON.parse(JSON.stringify(jobs));
 }
@@ -117,8 +145,8 @@ function ResultsSkeleton() {
   );
 }
 
-async function ResultsSection({ query }: { query: string }) {
-  const results = await performSearch(query);
+async function ResultsSection({ query, sort, category }: { query: string, sort: string, category: string | null }) {
+  const results = await performSearch(query, sort, category);
 
   return (
     <div>
@@ -132,12 +160,18 @@ async function ResultsSection({ query }: { query: string }) {
             <span className="font-medium text-blue-500">found</span>
           </span>
         </div>
-        {query && (
-          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm text-slate-600 shadow-sm">
-            <span className="text-slate-400">for</span>
-            <span className="font-semibold text-slate-900">&ldquo;{query}&rdquo;</span>
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {query && (
+            <span className="hidden sm:inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm text-slate-600 shadow-sm">
+              <span className="text-slate-400">for</span>
+              <span className="font-semibold text-slate-900">&ldquo;{query}&rdquo;</span>
+            </span>
+          )}
+          <Suspense fallback={<div className="h-9 w-32 bg-slate-100 rounded-lg animate-pulse" />}>
+            <CategoryFilter />
+            <SortController />
+          </Suspense>
+        </div>
       </div>
 
       {results.length > 0 ? (
@@ -211,10 +245,12 @@ async function ResultsSection({ query }: { query: string }) {
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>
+  searchParams: Promise<{ q?: string, sort?: string, category?: string }>
 }) {
   const resolvedSearchParams = await searchParams;
   const query = resolvedSearchParams.q || '';
+  const sort = resolvedSearchParams.sort || 'newest';
+  const category = resolvedSearchParams.category || null;
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -253,7 +289,7 @@ export default async function SearchPage({
 
       <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10">
         <Suspense fallback={<ResultsSkeleton />}>
-          <ResultsSection query={query} />
+          <ResultsSection query={query} sort={sort} category={category} />
         </Suspense>
       </div>
     </main>

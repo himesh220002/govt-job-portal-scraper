@@ -187,10 +187,10 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         <div
-          className={`lg:hidden absolute top-full left-0 w-full bg-white backdrop-blur-xl border-t border-slate-200 transition-all duration-300 ease-in-out overflow-y-auto flex flex-col shadow-2xl ${open ? 'h-[calc(100vh-64px)] opacity-100 pointer-events-auto' : 'h-0 opacity-0 pointer-events-none'
+          className={`lg:hidden absolute top-full left-0 w-full bg-gray-800 backdrop-blur-xl border-t border-slate-200 transition-all duration-300 ease-in-out overflow-y-auto flex flex-col shadow-2xl ${open ? 'h-[calc(100vh-64px)] opacity-100 pointer-events-auto' : 'h-0 opacity-0 pointer-events-none'
             }`}
         >
-          <div className="flex flex-col p-6 mt-6 space-y-6 flex-1">
+          <div className="flex flex-col p-6 mt-6 space-y-6">
             <SearchBar variant="light" onSubmitted={() => setOpen(false)} />
 
             {/* Mobile language switch container */}
@@ -204,9 +204,9 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className={`rounded-xl px-5 py-4 w-full text-center text-base font-bold transition-all ${active
-                      ? 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100'
-                      : 'text-slate-700 border border-transparent hover:bg-slate-50 hover:text-blue-700'
+                    className={`rounded-xl px-3 py-3 w-full text-center text-base font-bold transition-all ${active
+                      ? 'bg-blue-50 text-blue-900 text-xl shadow-sm border border-blue-100 max-w-[300px]'
+                      : 'text-slate-100 border border-transparent hover:bg-slate-50 hover:text-blue-700'
                       }`}
                   >
                     {link.label}
@@ -217,7 +217,7 @@ export default function Navbar() {
 
             <div className="mt-auto pt-6 border-t border-slate-200 pb-8">
               <Link
-                href="/category/latest-job"
+                href="/search"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-4 text-center text-base font-bold text-white shadow-lg shadow-blue-600/25 active:scale-95 transition-transform"
               >
