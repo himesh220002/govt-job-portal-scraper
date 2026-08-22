@@ -83,13 +83,13 @@ function KeyValueRows({ pairs }: { pairs: { label: string; value: string }[] }) 
   return (
     <div className="space-y-0">
       {pairs.map((pair, i) => (
-        <div key={i} className={`flex items-center justify-between gap-4 mb-2 rounded-lg hover:bg-slate-100 ${pair.label ? 'border-b border-slate-100 p-2 last:border-0' : ''}`}>
+        <div key={i} className={`flex items-start justify-between gap-4 mb-2 rounded-lg hover:bg-slate-100 ${pair.label ? 'border-b border-slate-100 p-2 last:border-0' : ''}`}>
           {pair.label && (
-            <span className="w-fit shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs sm:text-sm font-semibold text-slate-700">
+            <span className="w-fit max-w-[300px] xl:shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs sm:text-sm font-semibold text-slate-700">
               {pair.label}
             </span>
           )}
-          <span className={` text-xs sm:text-sm ${pair.label ? 'w-full text-right font-medium text-slate-900' : 'text-left p-1 text-slate-600'}`}>
+          <span className={` text-xs sm:text-sm p-1 ${pair.label ? 'w-full text-right font-medium text-slate-900' : 'text-left text-slate-600'}`}>
             {pair.value}
           </span>
         </div>
@@ -266,7 +266,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
       <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-10">
         {/* Info cards */}
         {hasInfoCards && (
-          <div className="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-1">
+          <div className="mb-8 grid grid-cols-1 gap-5 grid-cols-1">
             {importantDates.length > 0 && (
               <InfoCard icon="📅" title="Important Dates" gradient="from-blue-600 to-indigo-600" chip="bg-white">
                 <div className="space-y-3">

@@ -16,7 +16,7 @@ export default function TermsPage() {
             📜 Terms &amp; Conditions
           </h1>
           <p className="text-lg text-slate-600">
-            DeshJob.com
+            SarkarLink.com
           </p>
         </div>
 
@@ -29,7 +29,7 @@ export default function TermsPage() {
               Acceptance of Terms
             </h2>
             <p className="pl-10">
-              By accessing or using DeshJob.com, you agree to these Terms &amp; Conditions. If you do not agree, please discontinue use immediately.
+              By accessing or using SarkarLink.com, you agree to these Terms &amp; Conditions. If you do not agree, please discontinue use immediately.
             </p>
           </section>
 

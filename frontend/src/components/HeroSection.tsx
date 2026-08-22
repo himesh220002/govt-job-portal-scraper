@@ -151,11 +151,14 @@ export default function HeroSection() {
             </span>
           </div>
 
-          <h1 className="mx-auto mt-6 max-w-4xl font-display text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl animate-fade-up [animation-delay:100ms]">
+          <h1 className="block sm:hidden mx-auto mt-6 max-w-4xl font-display text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl animate-fade-up [animation-delay:100ms]">
+            Your Gateway to <span className="shimmer-text">Government Jobs</span>
+          </h1>
+          <h1 className="hidden sm:block mx-auto mt-6 max-w-4xl font-display text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl animate-fade-up [animation-delay:100ms]">
             Your Gateway to <span className="shimmer-text">Government Jobs</span>, Results &amp; Admit Cards
           </h1>
 
-          <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-blue-100/90 animate-fade-up [animation-delay:200ms]">
+          <p className="mx-auto mt-5 max-w-2xl text-xs sm:text-lg leading-relaxed text-blue-100/90 animate-fade-up [animation-delay:200ms]">
             Get the latest Sarkari results, job notifications, admit cards, answer keys and syllabi — all in one place, updated daily from verified official sources.
           </p>
 
@@ -167,7 +170,7 @@ export default function HeroSection() {
                 <Link
                   key={term}
                   href={`/search?q=${encodeURIComponent(term)}`}
-                  className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-blue-100 backdrop-blur-sm transition-all hover:border-cyan-300/50 hover:bg-cyan-400/10 hover:text-cyan-200 hover:scale-105"
+                  className="rounded-full border border-white/15 bg-white/5 px-2 sm:px-3.5 py-1 sm:py-1.5 text-xs font-semibold text-blue-100 backdrop-blur-sm transition-all hover:border-cyan-300/50 hover:bg-cyan-400/10 hover:text-cyan-200 hover:scale-105"
                 >
                   {term}
                 </Link>

@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
             🔒 Privacy Policy
           </h1>
           <p className="text-lg text-slate-600">
-            DeshJob.com
+            SarkarLink.com
           </p>
         </div>
 

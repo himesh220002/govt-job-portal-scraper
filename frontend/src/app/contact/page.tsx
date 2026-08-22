@@ -42,8 +42,8 @@ export default function ContactPage() {
                   <p className="text-sm text-slate-500">Drop us a line anytime</p>
                 </div>
               </div>
-              <a href="mailto:support@deshjob.com" className="text-blue-600 font-medium hover:underline">
-                support@deshjob.com
+              <a href="mailto:support@sarkarlink.com" className="text-blue-600 font-medium hover:underline">
+                support@sarkarlink.com
               </a>
             </div>
 
@@ -62,10 +62,10 @@ export default function ContactPage() {
               </div>
               <div className="space-y-2">
                 <a href="#" className="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition-colors">
-                  <span className="font-medium">X (Twitter):</span> @DeshJob
+                  <span className="font-medium">X (Twitter):</span> @SarkarLink
                 </a>
                 <a href="#" className="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition-colors">
-                  <span className="font-medium">Telegram:</span> t.me/deshjob
+                  <span className="font-medium">Telegram:</span> t.me/sarkarlink
                 </a>
               </div>
             </div>

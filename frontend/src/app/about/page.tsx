@@ -29,7 +29,7 @@ export default function AboutPage() {
           <div className="p-8 sm:p-12 space-y-8 text-slate-700 leading-relaxed text-lg">
             
             <p>
-              Welcome to <strong>DeshJob.com</strong>, your one-stop destination for tracking the most crucial public sector opportunities in India. 
+              Welcome to <strong>SarkarLink.com</strong>, your one-stop destination for tracking the most crucial public sector opportunities in India. 
             </p>
 
             <p>

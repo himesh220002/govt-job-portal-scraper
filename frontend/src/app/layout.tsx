@@ -21,14 +21,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "DeshJob.com - India's #1 Govt Jobs & Sarkari Result Portal",
-  description: "Get real-time updates on latest government jobs, Sarkari results, admit cards, answer keys, and exam syllabus on DeshJob.com. Fast, reliable, and 100% secure.",
-  keywords: "Sarkari Result, Govt Jobs, Government Jobs 2026, Free Job Alert, SSC, UPSC, Bank Jobs, Railway Jobs, DeshJob, Desh Job",
+  title: "SarkarLink.com - India's #1 Govt Jobs & Sarkari Result Portal",
+  description: "Get real-time updates on latest government jobs, Sarkari results, admit cards, answer keys, and exam syllabus on SarkarLink.com. Fast, reliable, and 100% secure.",
+  keywords: "Sarkari Result, Govt Jobs, Government Jobs 2026, Free Job Alert, SSC, UPSC, Bank Jobs, Railway Jobs, SarkarLink, Sarkar Link",
   openGraph: {
-    title: "DeshJob.com - Govt Jobs & Sarkari Results",
-    description: "The fastest, most reliable portal for Indian government job notifications, admit cards, and results.",
-    url: "https://deshjob.com",
-    siteName: "DeshJob",
+    title: "SarkarLink.com - Govt Jobs & Sarkari Results",
+    description: "Your trusted gateway for latest government jobs, Sarkari results, and study resources.",
+    url: "https://sarkarlink.com",
+    siteName: "SarkarLink",
     locale: "en_IN",
     type: "website",
   },

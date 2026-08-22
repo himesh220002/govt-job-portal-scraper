@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Location Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f4f4f9;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 450px;
+            width: 100%;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .result-box {
+            margin-top: 20px;
+            text-align: left;
+            display: none;
+        }
+        .error {
+            color: red;
+            margin-top: 15px;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Find My Location</h2>
+        <p>Click the button below to fetch your PC's coordinates and address.</p>
+        
+        <button id="locBtn" onclick="getLocation()">Check Your Location</button>
+        
+        <p id="errorMsg" class="error"></p>
+
+        <div id="resultBox" class="result-box">
+            <p><span class="label">Latitude:</span> <span id="latText">-</span></p>
+            <p><span class="label">Longitude:</span> <span id="lngText">-</span></p>
+            <hr>
+            <p><span class="label">Area Name (XYZ):</span> <span id="areaText">-</span></p>
+            <p><span class="label">City:</span> <span id="cityText">-</span></p>
+            <p><span class="label">State:</span> <span id="stateText">-</span></p>
+            <p><span class="label">Country:</span> <span id="countryText">-</span></p>
+            <hr>
+            <p><span class="label">Full Address:</span> <span id="fullAddressText">-</span></p>
+            <div id="mapDiv" style="display:none;width:500px;height:500px;margin-top:10px;border:1px solid #ddd;">
+                <img id="mapImg" src="" alt="Location map" style="width:100%;height:100%;object-fit:cover;" crossorigin="anonymous" onerror="this.onerror=null;this.src='/placeholder.svg'"}}" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getLocation() {
+            const btn = document.getElementById("locBtn");
+            const resultBox = document.getElementById("resultBox");
+            const errorMsg = document.getElementById("errorMsg");
+
+            // Reset UI states
+            btn.disabled = true;
+            btn.innerHTML = "Locating...";
+            errorMsg.innerHTML = "";
+            resultBox.style.display = "none";
+
+            // 1. Get raw coordinates from browser
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    // Display coordinates
+                    document.getElementById("latText").innerText = lat;
+                    document.getElementById("lngText").innerText = lng;
+
+                    // 2. Contact Nominatim (OpenStreetMap) API for reverse geocoding
+                    const apiUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`;
+
+                    fetch(apiUrl, {
+                        headers: {
+                            'User-Agent': 'location-checker-app'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) throw new Error(data.error);
+
+                            const addr = data.address;
+
+                            // Extract the specific neighborhood/suburb/road layer (your "xyz")
+                            const xyzArea = addr.suburb || addr.neighbourhood || addr.neighbourhood_level3 || addr.road || "Local Area Not Found";
+                            const city = addr.city || addr.town || addr.village || "Unknown City";
+                            const state = addr.state || "Unknown State";
+                            const country = addr.country || "Unknown Country";
+
+                            // Display data into text fields
+                            document.getElementById("areaText").innerText = xyzArea;
+                            document.getElementById("cityText").innerText = city;
+                            document.getElementById("stateText").innerText = state;
+                            document.getElementById("countryText").innerText = country;
+                            document.getElementById("fullAddressText").innerText = data.display_name || `${lat}, ${lng}`;
+
+                            // Show map snippet
+                            const mapDiv = document.getElementById("mapDiv");
+                            const mapImg = document.getElementById("mapImg");
+                            if (data.lat && data.lon) {
+                                mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${data.lat},${data.lon}&zoom=14&width=500&height=500`;
+                                mapDiv.style.display = "block";
+                            }
+
+                            // Show layout box
+                            resultBox.style.display = "block";
+                            btn.disabled = false;
+                            btn.innerHTML = "Check Your Location";
+                        })
+                        .catch(error => {
+                            console.error("Geocoding Error:", error);
+                            errorMsg.innerHTML = "Could not convert coordinates to address text.";
+                            resultBox.style.display = "block";
+                            btn.disabled = false;
+                            btn.innerHTML = "Check Your Location";
+                        });
+                },
+                (error) => {
+                    btn.disabled = false;
+                    btn.innerHTML = "Check Your Location";
+                    
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errorMsg.innerHTML = "Error: Please allow location access in your browser prompt.";
+                    } else {
+                        errorMsg.innerHTML = "Error: " + error.message;
+                    }
+                },
+                {
+                    enableHighAccuracy: true
+                }
+            );
+        }
+    </script>
+</body>
+</html>

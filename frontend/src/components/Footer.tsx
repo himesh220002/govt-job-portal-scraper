@@ -75,8 +75,8 @@ export default async function Footer() {
     .project({ updatedAt: 1 })
     .limit(1)
     .toArray();
-    
-  const lastScraped = latestJob.length > 0 && latestJob[0].updatedAt 
+
+  const lastScraped = latestJob.length > 0 && latestJob[0].updatedAt
     ? new Date(latestJob[0].updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : 'Unknown';
 
@@ -93,11 +93,11 @@ export default async function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="group flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 shadow-lg shadow-blue-600/30 ring-1 ring-white/20">
-                <span className="text-lg font-extrabold tracking-tight text-white">DJ</span>
+                <span className="text-lg font-extrabold tracking-tight text-white">SL</span>
               </div>
               <div className="leading-tight">
                 <span className="block font-display text-lg font-extrabold tracking-tight text-white">
-                  Desh<span className="text-gradient">Job</span>.com
+                  Sarkar<span className="text-gradient">Link</span>
                 </span>
                 <span className="block text-xs font-medium text-blue-200/70">
                   India's Govt Job Portal
@@ -175,14 +175,14 @@ export default async function Footer() {
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-blue-100/60">
-                © {new Date().getFullYear()} DeshJob.com. All rights reserved.
+                © {new Date().getFullYear()} SarkarLink.com. All rights reserved.
               </p>
               <p className="text-[10px] text-emerald-400/80 font-medium tracking-wider uppercase flex items-center gap-1.5">
-                 <span className="relative flex h-1.5 w-1.5">
-                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                 </span>
-                 Portal Last Updated: {lastScraped}
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                </span>
+                Portal Last Updated: {lastScraped}
               </p>
             </div>
             <p className="max-w-xl text-center text-xs text-blue-100/50 sm:text-right">
