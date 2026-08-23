@@ -237,7 +237,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   const hasLinks = Object.keys(importantLinks).length > 0;
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 animate-fade-down-fast">
       {/* Compact dark header */}
       <section className="relative overflow-hidden bg-[#050914] text-white">
         <div className="absolute inset-0 bg-gradient-to-b from-[#050914] via-[#0a1a3f] to-[#10255c]" />

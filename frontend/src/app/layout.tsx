@@ -19,11 +19,38 @@ const getTickerItems = unstable_cache(
       const recentJobs = await db.collection('scraper')
         .find({})
         .sort({ updatedAt: -1 })
-        .limit(6)
-        .project({ title: 1 })
+        .limit(50)
+        .project({ title: 1, lastOfficialUpdate: 1, updatedAt: 1 })
         .toArray();
       
-      return recentJobs.map(job => job.title);
+      const parseOfficialDate = (dateStr?: string) => {
+        if (!dateStr) return 0;
+        const cleanStr = dateStr.split('|')[0].trim();
+        const d = new Date(cleanStr);
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+      };
+
+      const sortedJobs = recentJobs.map((job: any) => ({
+        title: job.title,
+        actualDateValue: parseOfficialDate(job.lastOfficialUpdate) || new Date(job.updatedAt).getTime()
+      })).sort((a: any, b: any) => b.actualDateValue - a.actualDateValue).slice(0, 6);
+      
+      return sortedJobs.map(job => {
+        const title = job.title || "";
+        const yearMatch = title.match(/\b(20[1-3][0-9])\b/);
+        
+        let shortTitle = title;
+        if (yearMatch) {
+          const yearIndex = yearMatch.index! + 4;
+          shortTitle = title.substring(0, yearIndex).trim();
+        }
+        
+        // Enforce a strict max length of 40 characters
+        if (shortTitle.length > 40) {
+          return shortTitle.substring(0, 37).trim() + "...";
+        }
+        return shortTitle;
+      });
     } catch (e) {
       console.error("Failed to fetch ticker items", e);
       return [

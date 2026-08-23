@@ -267,7 +267,7 @@ export default async function HeroSection() {
         </div>
 
         {/* Layered wave divider into the page background */}
-        <div className="absolute inset-x-0 bottom-0 z-20 leading-none">
+        <div className="absolute inset-x-0 -bottom-[2px] z-20 leading-none">
           <svg
             className="block h-[70px] w-full sm:h-[110px]"
             viewBox="0 0 1440 120"

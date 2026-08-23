@@ -84,15 +84,7 @@ export default function Navbar({ tickerItems = [] }: { tickerItems?: string[] })
               ))}
             </div>
           </div>
-          <Link
-            href="/category/latest-job"
-            className="hidden sm:flex shrink-0 items-center gap-1.5 pr-6 pl-4 text-xs font-bold uppercase tracking-wider text-cyan-300 hover:text-cyan-200 transition-colors"
-          >
-            View All
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </Link>
+
         </div>
       </div>
 

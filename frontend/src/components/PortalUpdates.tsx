@@ -29,7 +29,7 @@ export default function PortalUpdates({ categorizedJobs, categoryOrder }: { cate
     return itemsCopy.sort((a, b) => {
       const getFourDigits = (recordId: string, title: string) => {
         const combined = `${recordId} ${title}`;
-        const matches = combined.match(/(?<!\d)\d{4}(?!\d)/g);
+        const matches = combined.match(/\b\d{4}\b/g);
         if (matches) {
           const maxYear = new Date().getFullYear() + 5;
           for (const match of matches) {
@@ -53,10 +53,12 @@ export default function PortalUpdates({ categorizedJobs, categoryOrder }: { cate
       if (yearA !== yearB) {
         return yearB - yearA;
       }
+      
       const parseDate = (lastOfficialUpdate?: string, updatedAt?: string) => {
         if (lastOfficialUpdate) {
           const dateStr = lastOfficialUpdate.split('|')[0].trim();
-          const time = new Date(dateStr).getTime();
+          // Append ' UTC' so it evaluates identically on both the server (Vercel UTC) and client (Local IST)
+          const time = new Date(dateStr + " UTC").getTime();
           if (!isNaN(time)) return time;
         }
         return new Date(updatedAt || 0).getTime();
