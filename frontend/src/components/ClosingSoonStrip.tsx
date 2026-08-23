@@ -25,8 +25,8 @@ const getNewUpdatesJobs = unstable_cache(
     const jobs = await db.collection('scraper')
       .find({ category: { $in: ['Admit Card', 'Result', 'Important', 'Certificate', 'Outsourcing/Offline Job'] } })
       .sort({ updatedAt: -1 })
-      .limit(10)
-      .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1, vacancyDetails: 1 })
+      .limit(50) // Fetch more to sort in memory by actual official date
+      .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1, lastOfficialUpdate: 1, vacancyDetails: 1 })
       .toArray();
     return JSON.parse(JSON.stringify(jobs));
   },
@@ -41,6 +41,7 @@ interface JobData {
   category: string;
   importantDates?: { raw_text: string }[];
   updatedAt: Date;
+  lastOfficialUpdate?: string;
   vacancyDetails?: Record<string, string>[];
 }
 
@@ -141,18 +142,28 @@ export default async function ClosingSoonStrip() {
     topUrgent = [...topUrgent, ...fallbackJobs];
   }
 
-  const topRecent = rawNewJobs.map((job: any) => ({
+  // Helper to parse official update strings like "16 December 2020 | 11:23 AM"
+  const parseOfficialDate = (dateStr?: string) => {
+    if (!dateStr) return 0;
+    const cleanStr = dateStr.split('|')[0].trim();
+    const d = new Date(cleanStr);
+    return isNaN(d.getTime()) ? 0 : d.getTime();
+  };
+
+  const sortedNewJobs = rawNewJobs.map((job: any) => ({
     _id: job._id.toString(),
     recordId: job.recordId,
     title: job.title,
     category: job.category,
     updatedAt: job.updatedAt,
+    lastOfficialUpdate: job.lastOfficialUpdate,
+    actualDateValue: parseOfficialDate(job.lastOfficialUpdate) || new Date(job.updatedAt).getTime(),
     vacancies: extractVacancies(job.title, job.vacancyDetails),
     closingDate: null,
     daysRemaining: null
-  })).slice(0, 3);
+  })).sort((a: any, b: any) => b.actualDateValue - a.actualDateValue).slice(0, 3);
 
-  if (topUrgent.length === 0 && topRecent.length === 0) return null;
+  if (topUrgent.length === 0 && sortedNewJobs.length === 0) return null;
 
   return (
     <div className="mx-auto mt-12 w-full max-w-sm sm:max-w-5xl animate-fade-up [animation-delay:500ms]">
@@ -170,25 +181,31 @@ export default async function ClosingSoonStrip() {
             </Link>
           </div>
           <div className="flex flex-col gap-2.5">
-            {topRecent.map((job: any) => (
-              <Link
-                key={job._id}
-                href={`/${job.recordId}`}
-                className="group flex items-center justify-between rounded-xl bg-white/5 border border-white/5 hover:border-emerald-500/30 hover:bg-white/10 px-4 py-2.5 transition-all"
-              >
-                <div className="flex flex-col overflow-hidden pr-3">
-                  <span className="truncate text-sm font-bold text-white leading-snug group-hover:text-emerald-200 transition-colors">{job.title}</span>
-                  <span className="text-[11px] text-slate-400 mt-0.5 flex gap-2">
-                    <span>{job.category}</span>
-                    <span className="text-white/20">|</span>
-                    <span>Updated: {new Date(job.updatedAt).toLocaleDateString('en-GB')}</span>
+            {sortedNewJobs.map((job: any) => {
+              const displayDate = job.lastOfficialUpdate 
+                ? job.lastOfficialUpdate.split('|')[0].trim() 
+                : new Date(job.updatedAt).toLocaleDateString('en-GB');
+                
+              return (
+                <Link
+                  key={job._id}
+                  href={`/${job.recordId}`}
+                  className="group flex items-center justify-between rounded-xl bg-white/5 border border-white/5 hover:border-emerald-500/30 hover:bg-white/10 px-4 py-2.5 transition-all"
+                >
+                  <div className="flex flex-col overflow-hidden pr-3">
+                    <span className="truncate text-sm font-bold text-white leading-snug group-hover:text-emerald-200 transition-colors">{job.title}</span>
+                    <span className="text-[11px] text-slate-400 mt-0.5 flex gap-2">
+                      <span>{job.category}</span>
+                      <span className="text-white/20">|</span>
+                      <span className="truncate">Updated: {displayDate}</span>
+                    </span>
+                  </div>
+                  <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20">
+                    New
                   </span>
-                </div>
-                <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20">
-                  New
-                </span>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </div>
 
