@@ -19,13 +19,7 @@ const NAV_LINKS = [
   { label: 'Study Resources', href: '/resources' },
 ];
 
-const TICKER_ITEMS = [
-  'SSC CGL 2026 Tier I dates announced',
-  'UPSC Civil Services Prelims result released',
-  'RRB NTPC CBT application window open',
-  'SBI PO 2026 notification out',
-  'New Delhi Railway recruitment 2026 live',
-];
+
 
 function LogoMark() {
   return (
@@ -35,7 +29,7 @@ function LogoMark() {
   );
 }
 
-export default function Navbar() {
+export default function Navbar({ tickerItems = [] }: { tickerItems?: string[] }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -82,7 +76,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto flex items-center">
           <div className="relative flex-1 overflow-hidden py-2 [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
             <div className="flex w-max animate-marquee gap-12 whitespace-nowrap px-6 text-xs sm:text-sm font-medium">
-              {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+              {[...tickerItems, ...tickerItems].map((item, i) => (
                 <span key={i} className="flex items-center gap-2 text-blue-100">
                   <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.9)]" />
                   {item}
@@ -115,7 +109,7 @@ export default function Navbar() {
             <LogoMark />
             <div className="leading-tight">
               <span className="block font-display text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
-                Sarkar<span className="bg-gradient-to-b from-blue-600 to-green-600 text-transparent bg-clip-text">Link</span>
+                Sarkar<span className="text-gradient">Link</span>
               </span>
               <span className="block text-[11px] sm:text-xs font-medium tracking-wide text-slate-500">
                 India's Govt Job Portal

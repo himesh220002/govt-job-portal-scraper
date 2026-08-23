@@ -1,8 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useTransition } from 'react';
+import { submitContact } from '@/app/actions/contact';
 
 export default function ContactPage() {
+  const [isPending, startTransition] = useTransition();
+  const [status, setStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
   return (
     <div className="bg-slate-50 min-h-screen pt-12 pb-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -76,7 +79,27 @@ export default function ContactPage() {
           <div className="lg:col-span-2 bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 p-8 sm:p-10">
             <h2 className="text-2xl font-bold text-slate-900 mb-6">Send us a Message</h2>
             
-            <form className="space-y-6">
+            <form 
+              className="space-y-6"
+              action={(formData) => {
+                setStatus({ type: null, message: '' });
+                startTransition(async () => {
+                  const result = await submitContact(formData);
+                  if (result.success) {
+                    setStatus({ type: 'success', message: 'Thanks for reaching out! We will get back to you shortly.' });
+                    // Optional: reset form using a ref, but Next.js forms typically reset or you can just leave it since the message is clear.
+                  } else {
+                    setStatus({ type: 'error', message: result.error || 'Something went wrong.' });
+                  }
+                });
+              }}
+            >
+              {status.type && (
+                <div className={`p-4 rounded-xl text-sm font-semibold border ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                  {status.message}
+                </div>
+              )}
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
@@ -85,6 +108,7 @@ export default function ContactPage() {
                   <input
                     type="text"
                     id="name"
+                    name="name"
                     className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
                     placeholder="John Doe"
                     required
@@ -97,6 +121,7 @@ export default function ContactPage() {
                   <input
                     type="email"
                     id="email"
+                    name="email"
                     className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
                     placeholder="john@example.com"
                     required
@@ -111,6 +136,7 @@ export default function ContactPage() {
                 <input
                   type="text"
                   id="subject"
+                  name="subject"
                   className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
                   placeholder="How can we help you?"
                   required
@@ -123,6 +149,7 @@ export default function ContactPage() {
                 </label>
                 <textarea
                   id="message"
+                  name="message"
                   rows={5}
                   className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all resize-y"
                   placeholder="Write your message here..."
@@ -131,17 +158,16 @@ export default function ContactPage() {
               </div>
 
               <button
-                type="button"
-                className="w-full sm:w-auto inline-flex justify-center items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition-all hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5 active:scale-95"
-                onClick={(e) => {
-                  e.preventDefault();
-                  alert("Thanks for reaching out! We'll get back to you shortly.");
-                }}
+                type="submit"
+                disabled={isPending}
+                className="w-full sm:w-auto inline-flex justify-center items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition-all hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Send Message
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
+                {isPending ? 'Sending...' : 'Send Message'}
+                {!isPending && (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                )}
               </button>
             </form>
           </div>

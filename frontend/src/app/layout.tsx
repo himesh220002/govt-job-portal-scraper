@@ -3,11 +3,39 @@ import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
 
 import NextTopLoader from "nextjs-toploader";
+import { unstable_cache } from 'next/cache';
+import clientPromise from '@/lib/mongodb';
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+
+const getTickerItems = unstable_cache(
+  async () => {
+    try {
+      const client = await clientPromise;
+      const db = client.db('govtJobScraperDB');
+      const recentJobs = await db.collection('scraper')
+        .find({})
+        .sort({ updatedAt: -1 })
+        .limit(6)
+        .project({ title: 1 })
+        .toArray();
+      
+      return recentJobs.map(job => job.title);
+    } catch (e) {
+      console.error("Failed to fetch ticker items", e);
+      return [
+        'SSC CGL 2026 Tier I dates announced',
+        'UPSC Civil Services Prelims result released',
+        'RRB NTPC CBT application window open',
+      ];
+    }
+  },
+  ['ticker-items'],
+  { revalidate: 60, tags: ['jobs'] }
+);
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -50,18 +78,20 @@ export const viewport: Viewport = {
   themeColor: "#050914",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const tickerItems = await getTickerItems();
+
   return (
     <html lang="en" className={`${manrope.variable} ${inter.variable}`}>
       <body className="bg-slate-50 text-slate-900 font-sans antialiased">
         <NextTopLoader color="#2563eb" showSpinner={false} />
         <ScrollToTop />
         <ServiceWorkerRegister />
-        <Navbar />
+        <Navbar tickerItems={tickerItems} />
         <main className="flex min-h-screen flex-col">{children}</main>
         <Footer />
       </body>
