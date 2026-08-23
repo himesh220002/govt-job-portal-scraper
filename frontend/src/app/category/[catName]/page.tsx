@@ -13,10 +13,33 @@ const getJobs = unstable_cache(
   async () => {
     const client = await clientPromise;
     const db = client.db('govtJobScraperDB');
-    const jobs = await db.collection('scraper')
+    const rawJobs = await db.collection('scraper')
       .find({})
-      .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1, lastOfficialUpdate: 1 })
+      .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1, lastOfficialUpdate: 1, importantDates: 1 })
       .toArray();
+
+    const jobs = rawJobs.map((job: any) => {
+      let extractedLastDate = null;
+      if (job.importantDates) {
+        const rawText = Array.isArray(job.importantDates._raw) 
+          ? job.importantDates._raw.map((i: any) => i.raw_text).join(' ') 
+          : JSON.stringify(job.importantDates);
+        
+        const match = rawText.match(/last date[^\n:]*[:\n]\s*([0-9]{1,2}[\/\-][0-9]{1,2}[\/\-][0-9]{2,4}|Not Available|TBA|Soon|As per Schedule)/i);
+        if (match) {
+          extractedLastDate = match[1];
+        }
+      }
+      return {
+        _id: job._id,
+        recordId: job.recordId,
+        title: job.title,
+        category: job.category,
+        updatedAt: job.updatedAt,
+        lastOfficialUpdate: job.lastOfficialUpdate,
+        extractedLastDate
+      };
+    });
 
     return JSON.parse(JSON.stringify(jobs));
   },

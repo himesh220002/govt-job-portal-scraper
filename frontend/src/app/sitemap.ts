@@ -28,9 +28,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   categories.forEach(category => {
-    const meta = categoryMeta(category);
+    const slug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     sitemapEntries.push({
-      url: `${baseUrl}/category/${meta.slug}`,
+      url: `${baseUrl}/category/${slug}`,
       lastModified: new Date(),
       changeFrequency: 'hourly',
       priority: 0.8,

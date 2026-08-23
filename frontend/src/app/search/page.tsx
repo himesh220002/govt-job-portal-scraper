@@ -50,11 +50,34 @@ async function performSearch(query: string, sort: string, categoryFilter: string
 
   const rawJobs = await db.collection('scraper')
     .find(filter)
-    .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1, lastOfficialUpdate: 1 })
+    .project({ _id: 1, recordId: 1, title: 1, category: 1, updatedAt: 1, lastOfficialUpdate: 1, importantDates: 1 })
     .sort({ updatedAt: -1 })
     .toArray();
 
-  const jobs = rawJobs.sort((a, b) => {
+  const mappedRawJobs = rawJobs.map((job: any) => {
+    let extractedLastDate = null;
+    if (job.importantDates) {
+      const rawText = Array.isArray(job.importantDates._raw) 
+        ? job.importantDates._raw.map((i: any) => i.raw_text).join(' ') 
+        : JSON.stringify(job.importantDates);
+      
+      const match = rawText.match(/last date[^\n:]*[:\n]\s*([0-9]{1,2}[\/\-][0-9]{1,2}[\/\-][0-9]{2,4}|Not Available|TBA|Soon|As per Schedule)/i);
+      if (match) {
+        extractedLastDate = match[1];
+      }
+    }
+    return {
+      _id: job._id,
+      recordId: job.recordId,
+      title: job.title,
+      category: job.category,
+      updatedAt: job.updatedAt,
+      lastOfficialUpdate: job.lastOfficialUpdate,
+      extractedLastDate
+    };
+  });
+
+  const jobs = mappedRawJobs.sort((a, b) => {
     if (sort === 'a-z') {
       return (a.title || '').localeCompare(b.title || '');
     } else if (sort === 'z-a') {
@@ -79,12 +102,23 @@ async function performSearch(query: string, sort: string, categoryFilter: string
 
 
     const parseDate = (lastOfficialUpdate?: string, updatedAt?: string) => {
+      let time = NaN;
       if (lastOfficialUpdate) {
         const dateStr = lastOfficialUpdate.split('|')[0].trim();
-        const time = new Date(dateStr).getTime();
-        if (!isNaN(time)) return time;
+        time = new Date(dateStr).getTime();
+        
+        if (isNaN(time)) {
+          const match = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+          if (match) {
+            const day = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10) - 1;
+            let year = parseInt(match[3], 10);
+            if (year < 100) year += 2000;
+            time = new Date(year, month, day).getTime();
+          }
+        }
       }
-      return new Date(updatedAt || 0).getTime();
+      return isNaN(time) ? new Date(updatedAt || 0).getTime() : time;
     };
 
     const dateA = parseDate(a.lastOfficialUpdate, a.updatedAt);
@@ -177,7 +211,7 @@ async function ResultsSection({ query, sort, category }: { query: string, sort: 
       {results.length > 0 ? (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <ul className="divide-y divide-slate-100">
-            {results.map((job: { _id: string; recordId: string; title: string; category: string; updatedAt?: string; lastOfficialUpdate?: string }) => (
+            {results.map((job: { _id: string; recordId: string; title: string; category: string; updatedAt?: string; lastOfficialUpdate?: string; extractedLastDate?: string | null }) => (
               <li key={job._id} className="group transition-colors hover:bg-slate-50/80">
                 <Link
                   href={`/${job.recordId}`}
@@ -191,6 +225,17 @@ async function ResultsSection({ query, sort, category }: { query: string, sort: 
                       <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold ${categoryBadge(job.category)}`}>
                         {job.category}
                       </span>
+                      {job.category === 'Latest Job' && job.extractedLastDate && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-0.5 font-semibold text-orange-700">
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                          </svg>
+                          Last Date: {job.extractedLastDate}
+                        </span>
+                      )}
                       <span className="inline-flex items-center gap-1 text-slate-500">
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>

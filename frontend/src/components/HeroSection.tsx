@@ -1,69 +1,41 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import SearchBar from './SearchBar';
+import ClosingSoonStrip from './ClosingSoonStrip';
+import clientPromise from '@/lib/mongodb';
 
 const topExams = [
-  { title: "UPSC Civil Services Exam (CSE)", fact: "Prelims May 24, Mains Aug 21, 2026", link: "/search?q=UPSC" },
-  { title: "SSC CGL 2026", fact: "Tier I June–July 2026", link: "/search?q=SSC" },
-  { title: "SBI PO 2026", fact: "Prelims Aug 22–23, 2026", link: "/search?q=SBI" },
-  { title: "RRB NTPC 2026", fact: "CBT May–June 2026", link: "/search?q=RRB" },
-  { title: "NDA I & II 2026", fact: "April 12 & Sept 13, 2026", link: "/search?q=NDA" },
+  { title: "UPSC Civil Services Exam (CSE)", fact: "Prelims May 24, Mains Aug 21, 2026", link: "/search?q=UPSC", keywords: ["UPSC"] },
+  { title: "SSC CGL 2026", fact: "Tier I June–July 2026", link: "/search?q=SSC", keywords: ["SSC CGL"] },
+  { title: "SBI PO 2026", fact: "Prelims Aug 22–23, 2026", link: "/search?q=SBI", keywords: ["SBI PO"] },
+  { title: "RRB NTPC 2026", fact: "CBT May–June 2026", link: "/search?q=RRB", keywords: ["RRB NTPC"] },
+  { title: "NDA I & II 2026", fact: "April 12 & Sept 13, 2026", link: "/search?q=NDA", keywords: ["NDA"] },
 ];
 
 const topJobs = [
-  { title: "Railway Recruitment", fact: "Latest RRB Job Openings", link: "/search?q=Railway" },
-  { title: "SSC Combined Exams", fact: "CGL, CHSL & MTS Posts", link: "/search?q=SSC" },
-  { title: "Banking Sector Jobs", fact: "PO, Clerk & SO Openings", link: "/search?q=Bank" },
+  { title: "Railway Recruitment", fact: "Latest RRB Job Openings", link: "/search?q=Railway", keywords: ["Railway", "RRB"] },
+  { title: "SSC Combined Exams", fact: "CGL, CHSL & MTS Posts", link: "/search?q=SSC", keywords: ["SSC"] },
+  { title: "Banking Sector Jobs", fact: "PO, Clerk & SO Openings", link: "/search?q=Bank", keywords: ["Bank", "SBI", "IBPS"] },
 ];
 
 const topAdmissions = [
-  { title: "IIT Admissions", fact: "JEE Advanced Updates", link: "/search?q=IIT" },
-  { title: "IIM Admissions", fact: "CAT & Management", link: "/search?q=IIM" },
-  { title: "Medical (AIIMS/NEET)", fact: "MBBS & BDS Counseling", link: "/search?q=Medical" },
+  { title: "IIT Admissions", fact: "JEE Advanced Updates", link: "/search?q=IIT", keywords: ["IIT", "JEE"] },
+  { title: "IIM Admissions", fact: "CAT & Management", link: "/search?q=IIM", keywords: ["IIM", "CAT"] },
+  { title: "Medical (AIIMS/NEET)", fact: "MBBS & BDS Counseling", link: "/search?q=Medical", keywords: ["AIIMS", "NEET", "Medical"] },
 ];
 
 const latestAnswerKeys = [
-  { title: "UGC NET Answer Key", fact: "Latest NTA UGC NET Updates", link: "/search?q=UGC+NET+Answer+Key", cta: "Download Key" },
-  { title: "SSC / Railway Keys", fact: "Latest Official Keys", link: "/search?q=SSC+Railway", cta: "Download Key" },
+  { title: "UGC NET Answer Key", fact: "Latest NTA UGC NET Updates", link: "/search?q=UGC+NET+Answer+Key", cta: "Download Key", keywords: ["UGC NET", "Answer Key"] },
+  { title: "SSC / Railway Keys", fact: "Latest Official Keys", link: "/search?q=SSC+Railway", cta: "Download Key", keywords: ["SSC", "Railway", "Answer Key"] },
 ];
 
 const topSyllabus = [
-  { title: "UPSC CSE Syllabus", fact: "Prelims & Mains (9 papers)", link: "/search?q=UPSC+Syllabus", cta: "View Syllabus" },
-  { title: "SSC CGL Syllabus", fact: "Tier I & II (Reasoning, GK, Quant)", link: "/search?q=SSC+CGL+Syllabus", cta: "View Syllabus" },
-  { title: "RRB NTPC Syllabus", fact: "CBT 1 & 2 (Maths, Reasoning)", link: "/search?q=RRB+NTPC+Syllabus", cta: "View Syllabus" },
+  { title: "UPSC CSE Syllabus", fact: "Prelims & Mains (9 papers)", link: "/search?q=UPSC+Syllabus", cta: "View Syllabus", keywords: ["UPSC", "Syllabus"] },
+  { title: "SSC CGL Syllabus", fact: "Tier I & II (Reasoning, GK, Quant)", link: "/search?q=SSC+CGL+Syllabus", cta: "View Syllabus", keywords: ["SSC CGL", "Syllabus"] },
+  { title: "RRB NTPC Syllabus", fact: "CBT 1 & 2 (Maths, Reasoning)", link: "/search?q=RRB+NTPC+Syllabus", cta: "View Syllabus", keywords: ["RRB NTPC", "Syllabus"] },
 ];
 
 const popularSearches = ["SSC", "UPSC", "Railway", "Bank", "NDA", "TET"];
-
-const FEATURES = [
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-      </svg>
-    ),
-    title: "Verified Sources",
-    sub: "100% official government updates",
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <polyline points="12 6 12 12 16 14"></polyline>
-      </svg>
-    ),
-    title: "Daily Updates",
-    sub: "Results, keys & dates in real time",
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-      </svg>
-    ),
-    title: "100% Free Access",
-    sub: "No registration, no paywalls ever",
-  },
-];
 
 const SectionHeading = ({ icon, chip, title, subtitle }: { icon: React.ReactNode; chip: string; title: string; subtitle?: string }) => (
   <div className="mb-4 sm:mb-8 flex items-center justify-center sm:justify-start gap-4">
@@ -84,34 +56,50 @@ const Card = ({
   link,
   cta = "View Details",
   variant = "default",
+  isNew = false,
 }: {
   title: string;
   fact: string;
   link: string;
   cta?: string;
   variant?: "default" | "highlight";
+  isNew?: boolean;
 }) => {
   const styles = {
-    default: "border-slate-200/80",
-    highlight: "border-blue-100/80 bg-gradient-to-br from-white to-blue-50/60",
+    default: isNew
+      ? "border-emerald-300 ring-1 ring-emerald-200 bg-emerald-50/20 shadow-emerald-100/50"
+      : "border-slate-200/80",
+    highlight: isNew
+      ? "border-emerald-300 ring-1 ring-emerald-200 bg-gradient-to-br from-white to-emerald-50/60 shadow-emerald-100/50"
+      : "border-blue-100/80 bg-gradient-to-br from-white to-blue-50/60",
   };
 
   return (
     <Link
       href={link}
-      className={`group card-hover relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border bg-white p-3 ms:p-6 shadow-sm ${styles[variant as keyof typeof styles]}`}
+      className={`group card-hover relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border bg-white p-3 sm:p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 ${styles[variant as keyof typeof styles]}`}
     >
+      {isNew && (
+        <span className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 uppercase tracking-wide border border-emerald-200 shadow-sm z-10">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          </span>
+          New Update
+        </span>
+      )}
+
       <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br from-blue-500/10 to-cyan-400/10 blur-2xl transition-opacity duration-300 opacity-0 group-hover:opacity-100" />
 
       <div className="relative">
-        <h3 className="mb-2 font-display text-md sm:text-lg font-bold leading-snug text-slate-900 transition-colors group-hover:text-blue-700 line-clamp-2">
+        <h3 className={`mb-2 font-display text-md sm:text-lg font-bold leading-snug transition-colors line-clamp-2 ${isNew ? 'pr-20 text-emerald-900 group-hover:text-emerald-700' : 'text-slate-900 group-hover:text-blue-700'}`}>
           {title}
         </h3>
         <p className="mb-4 text-xs sm:text-sm text-slate-500">{fact}</p>
       </div>
 
-      <span className="relative inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-600">
+      <span className={`relative inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold ${isNew ? 'text-emerald-600' : 'text-blue-600'}`}>
         {cta}
         <svg className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 12h14M12 5l7 7-7 7" />
@@ -121,7 +109,30 @@ const Card = ({
   );
 };
 
-export default function HeroSection() {
+export default async function HeroSection() {
+  const client = await clientPromise;
+  const db = client.db('govtJobScraperDB');
+
+  // Look for jobs updated in the last 3 days
+  const threeDaysAgo = new Date();
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+  const recentJobs = await db.collection('scraper')
+    .find({ updatedAt: { $gte: threeDaysAgo } })
+    .project({ title: 1 })
+    .limit(100)
+    .toArray();
+
+  const recentTitles = recentJobs.map(j => (j.title || '').toLowerCase());
+
+  const checkIsNew = (keywords?: string[]) => {
+    if (!keywords) return false;
+    return keywords.some(kw => {
+      const lowerKw = kw.toLowerCase();
+      return recentTitles.some(title => title.includes(lowerKw));
+    });
+  };
+
   return (
     <>
       {/* ---------- Premium Hero ---------- */}
@@ -165,7 +176,6 @@ export default function HeroSection() {
           <div className="mx-auto mt-9 max-w-2xl animate-fade-up [animation-delay:300ms]">
             <SearchBar />
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              {/* <span className="text-xs font-semibold uppercase tracking-wider text-blue-200/70">Trending:</span> */}
               {popularSearches.map((term) => (
                 <Link
                   key={term}
@@ -200,20 +210,60 @@ export default function HeroSection() {
             </Link>
           </div>
 
-          {/* Feature strip */}
-          <div className="mx-auto mt-14 grid w-fit sm:w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3 animate-fade-up [animation-delay:500ms]">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="glass-dark flex items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-transform duration-300 hover:-translate-y-1">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/30 to-cyan-400/30 text-cyan-200 ring-1 ring-white/10">
-                  {f.icon}
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-white">{f.title}</p>
-                  <p className="text-xs text-blue-100/70">{f.sub}</p>
+          {/* Feature strip replaced with dynamic Closing Soon Strip */}
+          <Suspense fallback={
+            <div className="mx-auto mt-12 w-full max-w-sm sm:max-w-5xl">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+
+                {/* Column 1 Skeleton */}
+                <div className="glass-dark rounded-2xl p-4 sm:p-5 border border-white/5 shadow-lg">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-6 rounded-full bg-white/10 animate-pulse" />
+                      <div className="h-4 w-28 rounded bg-white/10 animate-pulse" />
+                    </div>
+                    <div className="h-3 w-12 rounded bg-white/10 animate-pulse" />
+                  </div>
+                  <div className="flex flex-col gap-2.5">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="flex items-center justify-between rounded-xl bg-white/5 border border-white/5 px-4 py-2.5">
+                        <div className="flex flex-col gap-2 w-2/3">
+                          <div className="h-4 w-full rounded bg-white/10 animate-pulse" />
+                          <div className="h-2.5 w-1/2 rounded bg-white/10 animate-pulse" />
+                        </div>
+                        <div className="h-5 w-10 rounded bg-white/10 animate-pulse shrink-0" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Column 2 Skeleton */}
+                <div className="glass-dark rounded-2xl p-4 sm:p-5 border border-white/5 shadow-lg">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-6 rounded-full bg-white/10 animate-pulse" />
+                      <div className="h-4 w-32 rounded bg-white/10 animate-pulse" />
+                    </div>
+                    <div className="h-3 w-12 rounded bg-white/10 animate-pulse" />
+                  </div>
+                  <div className="flex flex-col gap-2.5">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="flex items-center justify-between rounded-xl bg-white/5 border border-white/5 px-4 py-2.5">
+                        <div className="flex flex-col gap-2 w-2/3">
+                          <div className="h-4 w-full rounded bg-white/10 animate-pulse" />
+                          <div className="h-2.5 w-1/2 rounded bg-white/10 animate-pulse" />
+                        </div>
+                        <div className="h-5 w-14 rounded bg-white/10 animate-pulse shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               </div>
-            ))}
-          </div>
+            </div>
+          }>
+            <ClosingSoonStrip />
+          </Suspense>
         </div>
 
         {/* Layered wave divider into the page background */}
@@ -249,7 +299,7 @@ export default function HeroSection() {
               subtitle="India · 2026 · Prelims, Mains & result dates"
             />
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-              {topExams.map((item, i) => <Card key={i} {...item} variant="highlight" />)}
+              {topExams.map((item, i) => <Card key={i} {...item} variant="highlight" isNew={checkIsNew(item.keywords)} />)}
             </div>
           </div>
 
@@ -263,7 +313,7 @@ export default function HeroSection() {
                 subtitle="Openings across Railways, SSC & Banks"
               />
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {topJobs.map((item, i) => <Card key={i} {...item} />)}
+                {topJobs.map((item, i) => <Card key={i} {...item} isNew={checkIsNew(item.keywords)} />)}
               </div>
             </div>
             <div>
@@ -274,7 +324,7 @@ export default function HeroSection() {
                 subtitle="IIT, IIM, NEET & AIIMS counselling"
               />
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {topAdmissions.map((item, i) => <Card key={i} {...item} />)}
+                {topAdmissions.map((item, i) => <Card key={i} {...item} isNew={checkIsNew(item.keywords)} />)}
               </div>
             </div>
           </div>
@@ -289,7 +339,7 @@ export default function HeroSection() {
                 subtitle="NTA, SSC & Railway official keys"
               />
               <div className="grid gap-4 grid-cols-2">
-                {latestAnswerKeys.map((item, i) => <Card key={i} {...item} />)}
+                {latestAnswerKeys.map((item, i) => <Card key={i} {...item} isNew={checkIsNew(item.keywords)} />)}
               </div>
             </div>
             <div className="lg:col-span-3">
@@ -300,7 +350,7 @@ export default function HeroSection() {
                 subtitle="UPSC, SSC CGL & RRB NTPC complete syllabus"
               />
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {topSyllabus.map((item, i) => <Card key={i} {...item} />)}
+                {topSyllabus.map((item, i) => <Card key={i} {...item} isNew={checkIsNew(item.keywords)} />)}
               </div>
             </div>
           </div>

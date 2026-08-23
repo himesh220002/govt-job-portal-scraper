@@ -4,6 +4,7 @@ import { categorizeJobs } from '@/lib/categorize';
 import HeroSection from '@/components/HeroSection';
 import PortalUpdates from '@/components/PortalUpdates';
 import InfoSection from '@/components/InfoSection';
+import PerksSection from '@/components/PerksSection';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
@@ -41,6 +42,8 @@ export default async function Home() {
       <PortalUpdates categorizedJobs={categorizedJobs} categoryOrder={categoryOrder} />
       
       <InfoSection />
+      
+      <PerksSection />
     </main>
   );
 }

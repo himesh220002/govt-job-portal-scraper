@@ -123,7 +123,7 @@ def parse_job_detail_page(url):
         "ageLimit": {},
         "vacancyDetails": [],
         "howToApply": [],
-        "importantLinks": {},
+        "importantLinks": [],
         "adsMeta": {},
         "updatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "source_url": url  # Keeping this for traceability
@@ -176,15 +176,6 @@ def parse_job_detail_page(url):
                 
         # Heuristic Text Classification for Age Limit, Dates, Fees, Links
         for row in rows:
-            # First handle Links inside this row
-            links = row.find_all('a', href=True)
-            for link in links:
-                link_text = link.get_text(strip=True)
-                href = link['href']
-                if href and link_text:
-                    key = link_text.lower().replace(" ", "_").replace(".", "")
-                    job_data["importantLinks"][key] = href
-                    
             # Next handle text content classification
             for cell in row.find_all(['td', 'th'], recursive=False):
                 text = cell.get_text(separator='\n', strip=True)
@@ -202,6 +193,60 @@ def parse_job_detail_page(url):
                 elif "how to fill" in lower_text:
                     if "read the notification" in lower_text:
                         job_data["howToApply"].append({"raw_text": text})
+                        
+            # Handle Links inside this row
+            links = row.find_all('a', href=True)
+            if links:
+                cells = row.find_all(['td', 'th'])
+                label = ""
+                if len(cells) >= 2:
+                    label = cells[0].get_text(strip=True)
+                    row_links_elems = []
+                    for cell in cells[1:]:
+                        row_links_elems.extend(cell.find_all('a', href=True))
+                else:
+                    label = ""
+                    row_links_elems = links
+                    
+                row_links = []
+                for link in row_links_elems:
+                    link_text = link.get_text(strip=True)
+                    href = link['href']
+                    if not href or not link_text:
+                        continue
+                        
+                    low_text = link_text.lower()
+                    low_label = label.lower()
+                    low_href = href.lower()
+                    
+                    if (
+                        "android app" in low_label or "android app" in low_text or
+                        "apple ios" in low_label or "apple ios" in low_text or
+                        "telegram" in low_label or "telegram" in low_text or
+                        "whatsapp" in low_label or "whatsapp" in low_text or
+                        "sarkariresultportal" in low_href or
+                        ("sarkari result" in low_label and "channel" in low_label) or
+                        ("tools" in low_label and "resizer" in low_label) or
+                        (low_label == "official website" and "sarkariresult.com" in low_href) or
+                        ("sarkari result" in low_label and "app" in low_label) or
+                        low_href in ("https://www.sarkariresult.com/", "https://www.sarkariresult.com", "http://www.sarkariresult.com/", "http://www.sarkariresult.com")
+                    ):
+                        continue
+                        
+                    row_links.append({"text": link_text, "url": href})
+                    
+                if row_links:
+                    label = label.replace("Sarkari Result® :", "").replace("Sarkari Result", "").strip()
+                    if label.startswith(":"): label = label[1:].strip()
+                    if label.endswith(":"): label = label[:-1].strip()
+                    
+                    if len(label) > 80:
+                        continue
+                        
+                    job_data["importantLinks"].append({
+                        "label": label,
+                        "links": row_links
+                    })
                     
     return job_data
 

@@ -52,7 +52,7 @@ interface JobDetail {
   applicationFee?: { _raw?: RawItem[] };
   ageLimit?: { _raw?: RawItem[] };
   vacancyDetails?: Record<string, string>[];
-  importantLinks?: Record<string, string>;
+  importantLinks?: any;
 }
 
 type InfoCardProps = {
@@ -136,6 +136,27 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   const vacancyTables: Array<{ headers: string[], rows: Record<string, string>[] }> = [];
   if (job.vacancyDetails && job.vacancyDetails.length > 0) {
     job.vacancyDetails.forEach(row => {
+      const rowText = Object.values(row).join(' ').toLowerCase();
+      
+      const isPromoRow = 
+        rowText.includes('click here') ||
+        rowText.includes('android apps') ||
+        rowText.includes('apple ios apps') ||
+        rowText.includes('download admit card') ||
+        rowText.includes('apply online') ||
+        rowText.includes('how to fill form') ||
+        rowText.includes('image resizer') ||
+        rowText.includes('resume cv maker') ||
+        rowText.includes('telegram') ||
+        rowText.includes('whatsapp') ||
+        rowText.includes('official website') ||
+        rowText.includes('our platform tools') ||
+        rowText.includes('download notification');
+
+      if (isPromoRow) {
+        return; // Skip this promotional row
+      }
+
       const headers = Object.keys(row);
       const headerKey = headers.join('|');
 
@@ -348,64 +369,125 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
               <span className="hidden sm:block h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {Object.entries(importantLinks).map(([key, url]) => {
-                const isGovUrl = url.includes('gov.in') || url.includes('nic.in');
-                const urlLower = url.toLowerCase();
-                const rawLabel = key.replace(/_/g, ' ').toUpperCase();
+            {Array.isArray(importantLinks) ? (
+              <div className="flex flex-col gap-4">
+                {importantLinks.map((section: any, idx: number) => {
+                  const validLinks = section.links.filter((link: any) => {
+                    const url = link.url;
+                    return !(url === 'https://www.sarkariresult.com/' || url === 'https://www.sarkariresult.com' || url === 'http://www.sarkariresult.com/' || url === 'http://www.sarkariresult.com');
+                  });
+                  
+                  if (validLinks.length === 0) return null;
 
-                // Remove spam links completely (from label or url)
-                if (
-                  urlLower.includes('sarkariresult') ||
-                  rawLabel.includes('SARKARI RESULT') ||
-                  rawLabel.includes('TELEGRAM') ||
-                  rawLabel.includes('WHATSAPP') ||
-                  rawLabel.includes('ANDROID APP') ||
-                  rawLabel.includes('APPLE IOS')
-                ) {
-                  return null;
-                }
+                  return (
+                  <div key={idx} className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                    {section.label && (
+                      <div className="bg-slate-50 px-5 py-3 border-b border-slate-200">
+                        <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">{section.label}</h4>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2">
+                      {validLinks.map((link: any, lIdx: number) => {
+                        const url = link.url;
+                        const finalLabel = link.text;
+                        const displayUrl = url.length > 42 ? url.substring(0, 42) + '...' : url;
+                        const isApplyOnline = section.label?.toLowerCase().includes('apply online') || finalLabel.toLowerCase().includes('apply online');
+                        
+                        return (
+                          <a
+                            key={lIdx}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={url}
+                            className={`group flex items-center justify-between gap-3 rounded-xl border px-5 py-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${isApplyOnline ? 'bg-blue-500 border-blue-600 hover:shadow-blue-500/25' : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-blue-600/10'}`}
+                          >
+                            <span className="flex items-center gap-3 min-w-0 flex-1">
+                              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${isApplyOnline ? 'bg-white/20 text-white' : 'bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white'}`}>
+                                {linkIcon(finalLabel.toUpperCase())}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className={`block truncate text-sm font-bold transition-colors ${isApplyOnline ? 'text-white' : 'text-slate-900 group-hover:text-blue-700'}`}>
+                                  {finalLabel}
+                               </span>
+                                <span className={`block truncate text-xs ${isApplyOnline ? 'text-blue-100' : 'text-slate-400'}`}>{displayUrl}</span>
+                              </span>
+                            </span>
+                            <svg className={`h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5 ${isApplyOnline ? 'text-white/70 group-hover:text-white' : 'text-slate-300 group-hover:text-blue-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )})}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {Object.entries(importantLinks).map(([key, url]) => {
+                  const isGovUrl = (url as string).includes('gov.in') || (url as string).includes('nic.in');
+                  const urlLower = (url as string).toLowerCase();
+                  const rawLabel = key.replace(/_/g, ' ').toUpperCase();
 
-                let finalLabel = rawLabel;
-                if (url.toLowerCase().endsWith('.pdf') || rawLabel.includes('NOTIFICATION') || rawLabel.includes('BROCHURE')) {
-                  finalLabel = 'DOWNLOAD PDF';
-                } else if (rawLabel.includes('VIDEO')) {
-                  finalLabel = 'WATCH VIDEO';
-                } else if (rawLabel.includes('OFFICIAL WEBSITE') || isGovUrl) {
-                  finalLabel = 'OFFICIAL WEBSITE';
-                } else if (rawLabel === 'CLICK HERE') {
-                  finalLabel = 'OPEN LINK';
-                }
+                  // Remove spam links completely (from label or url)
+                  if (
+                    rawLabel.includes('TELEGRAM') ||
+                    rawLabel.includes('WHATSAPP') ||
+                    rawLabel.includes('ANDROID APP') ||
+                    rawLabel.includes('APPLE IOS') ||
+                    urlLower.includes('sarkariresultportal') ||
+                    (rawLabel === 'OFFICIAL WEBSITE' && urlLower.includes('sarkariresult.com')) ||
+                    urlLower === 'https://www.sarkariresult.com/' ||
+                    urlLower === 'https://www.sarkariresult.com' ||
+                    urlLower === 'http://www.sarkariresult.com/' ||
+                    urlLower === 'http://www.sarkariresult.com'
+                  ) {
+                    return null;
+                  }
 
-                const displayUrl = url.length > 42 ? url.substring(0, 42) + '...' : url;
+                  let finalLabel = rawLabel;
+                  if ((url as string).toLowerCase().endsWith('.pdf') || rawLabel.includes('NOTIFICATION') || rawLabel.includes('BROCHURE')) {
+                    finalLabel = 'DOWNLOAD PDF';
+                  } else if (rawLabel.includes('VIDEO')) {
+                    finalLabel = 'WATCH VIDEO';
+                  } else if (rawLabel.includes('OFFICIAL WEBSITE') || isGovUrl) {
+                    finalLabel = 'OFFICIAL WEBSITE';
+                  } else if (rawLabel === 'CLICK HERE') {
+                    finalLabel = 'OPEN LINK';
+                  }
 
-                return (
-                  <a
-                    key={key}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={url}
-                    className="group flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-600/10"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 transition-colors group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white">
-                        {linkIcon(finalLabel)}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-blue-700">
-                          {finalLabel}
+                  const displayUrl = (url as string).length > 42 ? (url as string).substring(0, 42) + '...' : (url as string);
+                  const isApplyOnline = rawLabel.includes('APPLY ONLINE') || finalLabel.includes('APPLY ONLINE');
+
+                  return (
+                    <a
+                      key={key}
+                      href={url as string}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={url as string}
+                      className={`group flex items-center justify-between gap-3 rounded-2xl border px-5 py-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${isApplyOnline ? 'bg-blue-500 border-blue-600 hover:shadow-blue-500/25' : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-blue-600/10'}`}
+                    >
+                      <span className="flex items-center gap-3 min-w-0 flex-1">
+                        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${isApplyOnline ? 'bg-white/20 text-white' : 'bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white'}`}>
+                          {linkIcon(finalLabel)}
                         </span>
-                        <span className="block truncate text-xs text-slate-400">{displayUrl}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className={`block truncate text-sm font-bold transition-colors ${isApplyOnline ? 'text-white' : 'text-slate-900 group-hover:text-blue-700'}`}>
+                            {finalLabel}
+                          </span>
+                          <span className={`block truncate text-xs ${isApplyOnline ? 'text-blue-100' : 'text-slate-400'}`}>{displayUrl}</span>
+                        </span>
                       </span>
-                    </span>
-                    <svg className="h-4 w-4 shrink-0 text-slate-300 transition-all group-hover:translate-x-0.5 group-hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                  </a>
-                );
-              })}
-            </div>
+                      <svg className={`h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5 ${isApplyOnline ? 'text-white/70 group-hover:text-white' : 'text-slate-300 group-hover:text-blue-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
