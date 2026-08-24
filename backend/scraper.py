@@ -316,7 +316,7 @@ def batch_upsert_jobs(collection, jobs_data):
         logger.error(f"Bulk write failed: {e}")
 
 # --- Main Pipeline ---
-def run_pipeline():
+def run_pipeline(limit=None):
     logger.info("Starting Discovery Phase...")
     
     category_pages = [
@@ -360,6 +360,8 @@ def run_pipeline():
                         all_links[link['url']] = link
                     
     final_links = list(all_links.values())
+    if limit:
+        final_links = final_links[:limit]
     logger.info(f"Discovered {len(final_links)} unique job links for the targeted year range across all categories.")
     
     extracted_jobs = []
