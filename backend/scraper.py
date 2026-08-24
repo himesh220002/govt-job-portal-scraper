@@ -53,25 +53,39 @@ def validate_public_url(url: str) -> str:
 import requests
 
 def fetch_page(url):
-    """Fetches a URL using requests."""
-    delay = random.uniform(0.5, 1.5)
+    """Fetches a URL using Playwright to bypass bot protection."""
+    delay = random.uniform(1.0, 2.5)
     time.sleep(delay)
     
     try:
         url = validate_public_url(url)
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-        }
         logger.info(f"Navigating to {url}...")
-        response = requests.get(url, headers=headers, timeout=15)
         
-        if response.status_code in {401, 403, 429}:
-            logger.error(f"Access Denied (Bot Protection) at {url}. Status: {response.status_code}")
-            return None
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+            )
+            page = context.new_page()
             
-        return response.text
+            # Navigate and wait until network is mostly idle
+            response = page.goto(url, wait_until="domcontentloaded", timeout=30000)
             
-    except requests.exceptions.RequestException as e:
+            if response and response.status in {401, 403, 429}:
+                logger.error(f"Access Denied (Bot Protection) at {url}. Status: {response.status}")
+                browser.close()
+                return None
+                
+            # Allow some time for javascript challenges to pass
+            page.wait_for_timeout(2000)
+            html = page.content()
+            browser.close()
+            return html
+            
+    except PlaywrightTimeoutError:
+        logger.error(f"Timeout while fetching {url}")
+        return None
+    except Exception as e:
         logger.error(f"Failed to fetch {url}: {e}")
         return None
 
