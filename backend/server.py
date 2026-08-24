@@ -28,43 +28,62 @@ def trigger_scraper():
 
 import io
 
+from flask import Response
+import queue
+
 @app.route('/testonlinescrape', methods=['GET'])
 def test_online_scrape():
-    # Capture all logs into a string buffer
-    log_stream = io.StringIO()
-    stream_handler = logging.StreamHandler(log_stream)
-    stream_handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    stream_handler.setFormatter(formatter)
-    
-    # Attach to root logger
-    root_logger = logging.getLogger()
-    root_logger.addHandler(stream_handler)
-    
-    try:
-        run_pipeline(limit=3)
-        status_msg = "Successfully scraped 3 items! Check MongoDB."
-    except Exception as e:
-        logging.error(f"Test scrape failed with exception: {e}")
-        status_msg = f"Failed: {e}"
-    finally:
-        root_logger.removeHandler(stream_handler)
+    def generate_logs():
+        yield "<html><head><title>Live Scraper Logs</title></head>"
+        yield "<body style='background: #121212; color: #00ff00; font-family: monospace; padding: 20px;'>"
+        yield "<h2>Scraping 3 items... Live Logs:</h2><hr><pre>\n"
         
-    log_contents = log_stream.getvalue()
-    
-    # Return as HTML so it renders nicely in the browser
-    html = f"""
-    <html>
-    <head><title>Scraper Test Logs</title></head>
-    <body style="font-family: monospace; background: #121212; color: #fff; padding: 20px;">
-        <h2>Test Scrape Status: {status_msg}</h2>
-        <hr>
-        <h3>Live Execution Logs:</h3>
-        <pre style="background: #1e1e1e; color: #00ff00; padding: 15px; border-radius: 8px; overflow-x: auto;">{log_contents}</pre>
-    </body>
-    </html>
-    """
-    return html, 200
+        log_queue = queue.Queue()
+        
+        class QueueHandler(logging.Handler):
+            def emit(self, record):
+                try:
+                    msg = self.format(record) + "\n"
+                    log_queue.put(msg)
+                except Exception:
+                    pass
+                    
+        handler = QueueHandler()
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+        
+        root_logger = logging.getLogger()
+        root_logger.addHandler(handler)
+        
+        def background_scrape():
+            try:
+                run_pipeline(limit=3)
+                log_queue.put("\n[SUCCESS] Scraping completed successfully! Check your MongoDB.\nDONE\n")
+            except Exception as e:
+                log_queue.put(f"\n[ERROR] Scraping failed: {e}\nDONE\n")
+                
+        thread = threading.Thread(target=background_scrape)
+        thread.start()
+        
+        while True:
+            try:
+                # Wait up to 20 seconds for the next log (prevents gunicorn timeout)
+                msg = log_queue.get(timeout=20)
+                if msg == "DONE\n":
+                    break
+                # Yield the log and flush it to the browser immediately
+                yield msg
+            except queue.Empty:
+                yield "<i>...waiting for next log...</i>\n"
+                # Check if thread died silently
+                if not thread.is_alive():
+                    yield "\n[WARNING] Process terminated unexpectedly.\n"
+                    break
+                    
+        root_logger.removeHandler(handler)
+        yield "</pre></body></html>"
+        
+    return Response(generate_logs(), mimetype='text/html')
 
 @app.route('/', methods=['GET'])
 def health_check():
