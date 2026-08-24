@@ -22,7 +22,7 @@ const getTickerItems = unstable_cache(
         .limit(50)
         .project({ title: 1, lastOfficialUpdate: 1, updatedAt: 1 })
         .toArray();
-      
+
       const parseOfficialDate = (dateStr?: string) => {
         if (!dateStr) return 0;
         const cleanStr = dateStr.split('|')[0].trim();
@@ -34,17 +34,17 @@ const getTickerItems = unstable_cache(
         title: job.title,
         actualDateValue: parseOfficialDate(job.lastOfficialUpdate) || new Date(job.updatedAt).getTime()
       })).sort((a: any, b: any) => b.actualDateValue - a.actualDateValue).slice(0, 6);
-      
+
       return sortedJobs.map(job => {
         const title = job.title || "";
         const yearMatch = title.match(/\b(20[1-3][0-9])\b/);
-        
+
         let shortTitle = title;
         if (yearMatch) {
           const yearIndex = yearMatch.index! + 4;
           shortTitle = title.substring(0, yearIndex).trim();
         }
-        
+
         // Enforce a strict max length of 40 characters
         if (shortTitle.length > 40) {
           return shortTitle.substring(0, 37).trim() + "...";

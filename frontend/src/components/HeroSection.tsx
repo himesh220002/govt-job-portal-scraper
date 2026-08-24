@@ -5,7 +5,7 @@ import ClosingSoonStrip from './ClosingSoonStrip';
 import clientPromise from '@/lib/mongodb';
 
 const topExams = [
-  { title: "UPSC Civil Services Exam (CSE)", fact: "Prelims May 24, Mains Aug 21, 2026", link: "/search?q=UPSC", keywords: ["UPSC"] },
+  { title: "UPSC Civil Services", fact: "Prelims May 24, Mains Aug 21, 2026", link: "/search?q=UPSC", keywords: ["UPSC"] },
   { title: "SSC CGL 2026", fact: "Tier I June–July 2026", link: "/search?q=SSC", keywords: ["SSC CGL"] },
   { title: "SBI PO 2026", fact: "Prelims Aug 22–23, 2026", link: "/search?q=SBI", keywords: ["SBI PO"] },
   { title: "RRB NTPC 2026", fact: "CBT May–June 2026", link: "/search?q=RRB", keywords: ["RRB NTPC"] },
@@ -30,9 +30,9 @@ const latestAnswerKeys = [
 ];
 
 const topSyllabus = [
-  { title: "UPSC CSE Syllabus", fact: "Prelims & Mains (9 papers)", link: "/search?q=UPSC+Syllabus", cta: "View Syllabus", keywords: ["UPSC", "Syllabus"] },
-  { title: "SSC CGL Syllabus", fact: "Tier I & II (Reasoning, GK, Quant)", link: "/search?q=SSC+CGL+Syllabus", cta: "View Syllabus", keywords: ["SSC CGL", "Syllabus"] },
-  { title: "RRB NTPC Syllabus", fact: "CBT 1 & 2 (Maths, Reasoning)", link: "/search?q=RRB+NTPC+Syllabus", cta: "View Syllabus", keywords: ["RRB NTPC", "Syllabus"] },
+  { title: "UPSC CSE Syllabus", fact: "Prelims & Mains (9 papers)", link: "https://insightsonindia.com/wp-content/uploads/2013/07/upsc-syllabus.pdf", cta: "View Syllabus", keywords: ["UPSC", "Syllabus"] },
+  { title: "SSC CGL Syllabus", fact: "Tier I & II (Reasoning, GK, Quant)", link: "https://www.practicemock.com/blog/ssc-cgl-syllabus/", cta: "View Syllabus", keywords: ["SSC CGL", "Syllabus"] },
+  { title: "RRB NTPC Syllabus", fact: "CBT 1 & 2 (Maths, Reasoning)", link: "https://www.sreedharscce.com/blogs/rrb-ntpc-syllabus/", cta: "View Syllabus", keywords: ["RRB NTPC", "Syllabus"] },
 ];
 
 const popularSearches = ["SSC", "UPSC", "Railway", "Bank", "NDA", "TET"];
@@ -77,7 +77,7 @@ const Card = ({
   return (
     <Link
       href={link}
-      className={`group card-hover relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border bg-white p-3 sm:p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 ${styles[variant as keyof typeof styles]}`}
+      className={`group card-hover relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border bg-white p-3 sm:p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 ${styles[variant as keyof typeof styles]}`}
     >
       {isNew && (
         <span className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 uppercase tracking-wide border border-emerald-200 shadow-sm z-10">
@@ -93,10 +93,10 @@ const Card = ({
       <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br from-blue-500/10 to-cyan-400/10 blur-2xl transition-opacity duration-300 opacity-0 group-hover:opacity-100" />
 
       <div className="relative">
-        <h3 className={`mb-2 font-display text-md sm:text-lg font-bold leading-snug transition-colors line-clamp-2 ${isNew ? 'pr-20 text-emerald-900 group-hover:text-emerald-700' : 'text-slate-900 group-hover:text-blue-700'}`}>
+        <h3 className={`mb-2 font-display text-base sm:text-lg font-bold leading-snug transition-colors line-clamp-2 ${isNew ? 'pr-20 text-emerald-900 group-hover:text-emerald-700' : 'text-slate-900 group-hover:text-blue-700'}`}>
           {title}
         </h3>
-        <p className="mb-4 text-xs sm:text-sm text-slate-500">{fact}</p>
+        {/* <p className="mb-4 text-xs sm:text-sm text-slate-500">{fact}</p> */}
       </div>
 
       <span className={`relative inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold ${isNew ? 'text-emerald-600' : 'text-blue-600'}`}>
@@ -347,7 +347,7 @@ export default async function HeroSection() {
                 icon={<span className="text-xl">📘</span>}
                 chip="bg-amber-100 text-amber-800"
                 title="Top Exam Syllabus"
-                subtitle="UPSC, SSC CGL & RRB NTPC complete syllabus"
+                subtitle="UPSC, SSC CGL & RRB NTPC"
               />
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                 {topSyllabus.map((item, i) => <Card key={i} {...item} isNew={checkIsNew(item.keywords)} />)}

@@ -38,12 +38,14 @@ export default async function Home() {
   return (
     <main>
       <HeroSection />
-      
+
       <PortalUpdates categorizedJobs={categorizedJobs} categoryOrder={categoryOrder} />
-      
-      <InfoSection />
-      
+
       <PerksSection />
+
+      <InfoSection />
+
+
     </main>
   );
 }

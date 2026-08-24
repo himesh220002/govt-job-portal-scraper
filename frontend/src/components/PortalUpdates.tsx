@@ -53,7 +53,7 @@ export default function PortalUpdates({ categorizedJobs, categoryOrder }: { cate
       if (yearA !== yearB) {
         return yearB - yearA;
       }
-      
+
       const parseDate = (lastOfficialUpdate?: string, updatedAt?: string) => {
         if (lastOfficialUpdate) {
           const dateStr = lastOfficialUpdate.split('|')[0].trim();
@@ -144,7 +144,7 @@ export default function PortalUpdates({ categorizedJobs, categoryOrder }: { cate
                 </div>
 
                 {/* List */}
-                <ul className="flex-1 divide-y divide-slate-100">
+                <ul className="flex-1 bg-blue-50/20 divide-y divide-slate-100">
                   {displayItems.length > 0 ? (
                     displayItems.map((job: PortalJob) => (
                       <li key={job._id} className="relative transition-colors hover:bg-blue-50/50">
