@@ -77,7 +77,7 @@ const Card = ({
   return (
     <Link
       href={link}
-      className={`group card-hover relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border bg-white p-3 sm:p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 ${styles[variant as keyof typeof styles]}`}
+      className={`group card-hover relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border bg-white p-3 sm:p-4 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 ${styles[variant as keyof typeof styles]}`}
     >
       {isNew && (
         <span className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 uppercase tracking-wide border border-emerald-200 shadow-sm z-10">
@@ -96,7 +96,7 @@ const Card = ({
         <h3 className={`mb-2 font-display text-base sm:text-lg font-bold leading-snug transition-colors line-clamp-2 ${isNew ? 'pr-20 text-emerald-900 group-hover:text-emerald-700' : 'text-slate-900 group-hover:text-blue-700'}`}>
           {title}
         </h3>
-        {/* <p className="mb-4 text-xs sm:text-sm text-slate-500">{fact}</p> */}
+        <p className="hidden md:block mb-4 text-xs sm:text-sm text-slate-500">{fact}</p>
       </div>
 
       <span className={`relative inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold ${isNew ? 'text-emerald-600' : 'text-blue-600'}`}>
