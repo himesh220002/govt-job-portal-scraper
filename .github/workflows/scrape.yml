@@ -1,6 +1,9 @@
 name: Daily Scraper
 
 on:
+  push:
+    branches:
+      - master
   schedule:
     # Runs at 00:00 UTC (5:30 AM IST) every day
     - cron: '0 0 * * *'
