@@ -31,7 +31,7 @@ def categorize_job(title, record_id):
 load_dotenv()
 
 # --- Configuration ---
-MONGO_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+MONGO_URI = os.getenv("MONGO_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017/"))
 DB_NAME = "govtJobScraperDB"
 COLLECTION_NAME = "scraper"
 BASE_URL = "https://www.sarkariresult.com"
