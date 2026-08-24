@@ -59,7 +59,7 @@ export default function CategoryJobList({ originalCatName, categoryJobs }: { ori
         if (lastOfficialUpdate) {
           const dateStr = lastOfficialUpdate.split('|')[0].trim();
           time = new Date(dateStr).getTime();
-          
+
           if (isNaN(time)) {
             const match = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
             if (match) {
@@ -89,7 +89,7 @@ export default function CategoryJobList({ originalCatName, categoryJobs }: { ori
   return (
     <>
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3">
           <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.header} text-xl text-white shadow-lg`}>
             {meta.icon}
           </span>
@@ -107,8 +107,8 @@ export default function CategoryJobList({ originalCatName, categoryJobs }: { ori
               key={opt.key}
               onClick={() => setSortMode(opt.key)}
               className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${sortMode === opt.key
-                  ? `bg-gradient-to-r ${meta.header} text-white shadow-md`
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-blue-700'
+                ? `bg-gradient-to-r ${meta.header} text-white shadow-md`
+                : 'text-slate-600 hover:bg-slate-100 hover:text-blue-700'
                 }`}
             >
               <span className="text-xs">{opt.icon}</span>
