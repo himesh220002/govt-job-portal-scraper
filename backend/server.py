@@ -85,6 +85,64 @@ def test_online_scrape():
         
     return Response(generate_logs(), mimetype='text/html')
 
+@app.route('/scrapeall', methods=['GET'])
+def scrape_all():
+    # Require API key in the URL query string for browser access
+    # Example: https://renderurl.com/scrapeall?key=mypass
+    provided_key = request.args.get('key')
+    if provided_key != SCRAPER_API_KEY:
+        return jsonify({"error": "Unauthorized. Please provide ?key=YOUR_API_KEY"}), 401
+
+    def generate_logs():
+        yield "<html><head><title>Full Scraper Logs</title></head>"
+        yield "<body style='background: #121212; color: #00ff00; font-family: monospace; padding: 20px;'>"
+        yield "<h2>Full Scraping Pipeline Started... Live Logs:</h2><hr><pre>\n"
+        
+        log_queue = queue.Queue()
+        
+        class QueueHandler(logging.Handler):
+            def emit(self, record):
+                try:
+                    msg = self.format(record) + "\n"
+                    log_queue.put(msg)
+                except Exception:
+                    pass
+                    
+        handler = QueueHandler()
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+        
+        root_logger = logging.getLogger()
+        root_logger.addHandler(handler)
+        
+        def background_scrape():
+            try:
+                # FULL PIPELINE (No limit)
+                run_pipeline()
+                log_queue.put("\n[SUCCESS] Full Scraping completed successfully! Check your MongoDB.\nDONE\n")
+            except Exception as e:
+                log_queue.put(f"\n[ERROR] Scraping failed: {e}\nDONE\n")
+                
+        thread = threading.Thread(target=background_scrape)
+        thread.start()
+        
+        while True:
+            try:
+                msg = log_queue.get(timeout=20)
+                if msg == "DONE\n":
+                    break
+                yield msg
+            except queue.Empty:
+                yield "<i>...waiting for next log (scraping in progress)...</i>\n"
+                if not thread.is_alive():
+                    yield "\n[WARNING] Process terminated unexpectedly.\n"
+                    break
+                    
+        root_logger.removeHandler(handler)
+        yield "</pre></body></html>"
+        
+    return Response(generate_logs(), mimetype='text/html')
+
 @app.route('/', methods=['GET'])
 def health_check():
     return jsonify({"status": "Govt Jobs Scraper Web Service is alive!"}), 200
