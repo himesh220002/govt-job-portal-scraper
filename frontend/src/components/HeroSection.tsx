@@ -5,7 +5,7 @@ import ClosingSoonStrip from './ClosingSoonStrip';
 import clientPromise from '@/lib/mongodb';
 
 const topExams = [
-  { title: "UPSC Civil Services", fact: "Prelims May 24, Mains Aug 21, 2026", link: "/search?q=UPSC", keywords: ["UPSC"] },
+  { title: "UPSC Civil Services", fact: "Prelims, Mains 2026", link: "/search?q=UPSC", keywords: ["UPSC"] },
   { title: "SSC CGL 2026", fact: "Tier I June–July 2026", link: "/search?q=SSC", keywords: ["SSC CGL"] },
   { title: "SBI PO 2026", fact: "Prelims Aug 22–23, 2026", link: "/search?q=SBI", keywords: ["SBI PO"] },
   { title: "RRB NTPC 2026", fact: "CBT May–June 2026", link: "/search?q=RRB", keywords: ["RRB NTPC"] },
