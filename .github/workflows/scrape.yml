@@ -10,10 +10,40 @@ jobs:
   trigger-scraper:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Scraper API on Render
+      - name: Wake up & Trigger Scraper API on Render
+        env:
+          RAW_RENDER_URL: ${{ secrets.RENDER_DEPLOY_URL }}
+          API_KEY: ${{ secrets.SCRAPER_API_KEY }}
         run: |
-          # Sends a POST request to wake up Render and trigger the scraping in the background.
-          # Ensure RENDER_DEPLOY_URL and SCRAPER_API_KEY are configured in GitHub Secrets.
-          curl -X POST "${{ secrets.RENDER_DEPLOY_URL }}/api/run-scraper" \
-               -H "Authorization: Bearer ${{ secrets.SCRAPER_API_KEY }}" \
-               -H "Content-Type: application/json"
+          if [ -z "$RAW_RENDER_URL" ]; then
+            echo "ERROR: RENDER_DEPLOY_URL secret is not set!"
+            exit 1
+          fi
+
+          # Strip trailing slash if present
+          BASE_URL="${RAW_RENDER_URL%/}"
+
+          echo "Pinging Render service at $BASE_URL to wake up cold instance..."
+          # Ping health check endpoint to wake up sleeping Render free instance
+          curl -sS -f --connect-timeout 30 --retry 6 --retry-delay 10 --retry-connrefused "$BASE_URL/" || {
+            echo "Warning: Initial wake-up ping timed out or returned error. Proceeding to trigger API..."
+          }
+
+          echo "Triggering scraper via POST $BASE_URL/api/run-scraper..."
+          RESPONSE=$(curl -sS -f -w "\nHTTP_STATUS:%{http_code}" -X POST "$BASE_URL/api/run-scraper" \
+               -H "Authorization: Bearer $API_KEY" \
+               -H "Content-Type: application/json" \
+               --connect-timeout 30 \
+               --retry 3 \
+               --retry-delay 5 \
+               --retry-connrefused)
+
+          echo "Response from Render:"
+          echo "$RESPONSE"
+
+          if echo "$RESPONSE" | grep -q "HTTP_STATUS:2"; then
+            echo "Successfully triggered scraper pipeline on Render!"
+          else
+            echo "ERROR: Failed to trigger scraper pipeline. Check API_KEY secret and Render service logs."
+            exit 1
+          fi
