@@ -10,6 +10,33 @@ app = Flask(__name__)
 # You must set SCRAPER_API_KEY in your Render environment variables!
 SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY", "default-secret-key")
 
+import urllib.request
+
+def run_pipeline_with_keepalive(limit=None):
+    """Runs scraping pipeline while sending internal HTTP pings every 2 minutes to prevent Render free-tier sleep SIGTERM."""
+    stop_event = threading.Event()
+    
+    def keep_alive_worker():
+        port = int(os.environ.get("PORT", 8080))
+        url = f"http://127.0.0.1:{port}/"
+        while not stop_event.is_set():
+            stop_event.wait(120)  # Wait 2 minutes
+            if not stop_event.is_set():
+                try:
+                    with urllib.request.urlopen(url, timeout=5) as response:
+                        response.read()
+                    logging.info("[KEEP-ALIVE] Internal HTTP ping sent to prevent Render free tier sleep.")
+                except Exception as e:
+                    logging.debug(f"[KEEP-ALIVE] Internal ping failed: {e}")
+
+    pinger = threading.Thread(target=keep_alive_worker, daemon=True)
+    pinger.start()
+    
+    try:
+        run_pipeline(limit=limit)
+    finally:
+        stop_event.set()
+
 @app.route('/api/run-scraper', methods=['POST'])
 def trigger_scraper():
     auth_header = request.headers.get('Authorization')
@@ -19,12 +46,15 @@ def trigger_scraper():
         logging.warning("Unauthorized scraper trigger attempt.")
         return jsonify({"error": "Unauthorized"}), 401
     
-    # Run the scraper in a background thread.
-    # This ensures we respond instantly to GitHub Actions and don't timeout the HTTP connection.
-    thread = threading.Thread(target=run_pipeline)
+    limit = None
+    if request.is_json and request.json:
+        limit = request.json.get('limit')
+
+    # Run the scraper in a background thread with keep-alive
+    thread = threading.Thread(target=lambda: run_pipeline_with_keepalive(limit=limit))
     thread.start()
     
-    return jsonify({"status": "Scraper triggered successfully. Running in background."}), 202
+    return jsonify({"status": "Scraper triggered successfully. Running in background with keep-alive."}), 202
 
 import io
 
@@ -117,8 +147,8 @@ def scrape_all():
         
         def background_scrape():
             try:
-                # FULL PIPELINE (No limit)
-                run_pipeline()
+                # FULL PIPELINE with Keep-Alive to prevent Render free-tier sleep
+                run_pipeline_with_keepalive()
                 log_queue.put("\n[SUCCESS] Full Scraping completed successfully! Check your MongoDB.\nDONE\n")
             except Exception as e:
                 log_queue.put(f"\n[ERROR] Scraping failed: {e}\nDONE\n")
