@@ -353,7 +353,7 @@ def run_pipeline(limit=None):
                     all_links[link['url']] = link
                 else:
                     current_year = datetime.now(timezone.utc).year
-                    allowed_years = [str(y) for y in range(current_year - 1, current_year + 6)]
+                    allowed_years = [str(y) for y in range(current_year, current_year + 6)]
                     
                     # Filter by dynamic allowed years
                     if any(year in url_lower for year in allowed_years):
