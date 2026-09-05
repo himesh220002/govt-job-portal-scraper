@@ -12,7 +12,10 @@ notify-send -u normal -i terminal "Govt Jobs Scraper" "Cron Job Triggered! Start
 cd /home/himesh/MYProjects/Nextjs/govt-jobs-scraper/backend
 
 # Run the python scraper using virtualenv and append output to a log file
-/home/himesh/MYProjects/Nextjs/govt-jobs-scraper/backend/venv/bin/python3 scraper.py >> /home/himesh/MYProjects/Nextjs/govt-jobs-scraper/backend/cron_scraper.log 2>&1
-
-# Send completion notification
-notify-send -u normal -i checkmark "Govt Jobs Scraper" "Scraping completed and database updated successfully!"
+if /home/himesh/MYProjects/Nextjs/govt-jobs-scraper/backend/venv/bin/python3 scraper.py >> /home/himesh/MYProjects/Nextjs/govt-jobs-scraper/backend/cron_scraper.log 2>&1; then
+  # Send completion notification
+  notify-send -u normal -i checkmark "Govt Jobs Scraper" "Scraping completed and database updated successfully!"
+else
+  # Send failure notification if python script crashed
+  notify-send -u critical -i error "Govt Jobs Scraper" "Scraping FAILED! Check cron_scraper.log for details."
+fi
