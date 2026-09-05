@@ -33,7 +33,7 @@ jobs:
           RESPONSE=$(curl -sS -f -w "\nHTTP_STATUS:%{http_code}" -X POST "$BASE_URL/api/run-scraper" \
                -H "Authorization: Bearer $API_KEY" \
                -H "Content-Type: application/json" \
-               -d '{"limit": 800}' \
+               -d '{}' \
                --connect-timeout 30 \
                --retry 3 \
                --retry-delay 5 \

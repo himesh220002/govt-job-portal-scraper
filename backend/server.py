@@ -12,8 +12,8 @@ SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY", "default-secret-key")
 
 import urllib.request
 
-def run_pipeline_with_keepalive(limit=800):
-    """Runs scraping pipeline with an active keep-alive worker. Pings every 2 minutes until scraping finishes completely (all items)."""
+def run_pipeline_with_keepalive(limit=None):
+    """Runs scraping pipeline with an active keep-alive worker. Pings every 2 minutes until FULL scraping finishes completely across all categories."""
     stop_event = threading.Event()
     
     def keep_alive_worker():
@@ -29,11 +29,11 @@ def run_pipeline_with_keepalive(limit=800):
                     with urllib.request.urlopen(url, timeout=5) as response:
                         response.read()
                     ping_count += 1
-                    logging.info(f"[KEEP-ALIVE] Ping #{ping_count} sent. Keeping Render active until full scraping finishes.")
+                    logging.info(f"[KEEP-ALIVE] Ping #{ping_count} sent. Keeping Render active during full coverage scraping.")
                 except Exception as e:
                     logging.debug(f"[KEEP-ALIVE] Internal ping failed: {e}")
         
-        logging.info(f"[KEEP-ALIVE] Scraper finished. Total pings sent: {ping_count}. Render will sleep after 15 mins of inactivity.")
+        logging.info(f"[KEEP-ALIVE] Full scraping completed! Total pings sent: {ping_count}. Render will sleep after 15 mins of inactivity.")
 
     pinger = threading.Thread(target=keep_alive_worker, daemon=True)
     pinger.start()
@@ -52,8 +52,8 @@ def trigger_scraper():
         logging.warning("Unauthorized scraper trigger attempt.")
         return jsonify({"error": "Unauthorized"}), 401
     
-    # Default to 800 items on cloud trigger to process all available postings until completion
-    limit = 800
+    # Default to None (Full Coverage across all categories) on cloud trigger
+    limit = None
     data = request.get_json(silent=True)
     if isinstance(data, dict) and 'limit' in data:
         limit = data.get('limit')
@@ -62,7 +62,7 @@ def trigger_scraper():
     thread = threading.Thread(target=lambda: run_pipeline_with_keepalive(limit=limit))
     thread.start()
     
-    return jsonify({"status": f"Full scraper triggered successfully for up to {limit} items. Running in background with continuous keep-alive until finished."}), 202
+    return jsonify({"status": "Full coverage scraper triggered successfully. Running in background with continuous keep-alive until finished."}), 202
 
 import io
 
