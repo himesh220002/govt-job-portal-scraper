@@ -12,29 +12,29 @@ SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY", "default-secret-key")
 
 import urllib.request
 
-def run_pipeline_with_keepalive(limit=None):
-    """Runs scraping pipeline with a controlled keep-alive worker. Pings every 5 minutes, max 4 times (20 mins max), then auto-exits to preserve Render free-tier hours."""
+def run_pipeline_with_keepalive(limit=100):
+    """Runs scraping pipeline with a controlled keep-alive worker. Pings every 2 minutes, max 3 times (6 mins max), then auto-exits to preserve Render free-tier hours."""
     stop_event = threading.Event()
     
     def keep_alive_worker():
         port = int(os.environ.get("PORT", 8080))
         url = f"http://127.0.0.1:{port}/"
-        max_pings = 4  # 4 pings max = 20 minutes max duration
+        max_pings = 3  # 3 pings max = 6 minutes max duration
         pings_done = 0
         
         while not stop_event.is_set() and pings_done < max_pings:
-            # Wait 5 minutes (300 seconds)
-            stopped = stop_event.wait(300)
+            # Wait 2 minutes (120 seconds) between pings
+            stopped = stop_event.wait(120)
             if not stopped and pings_done < max_pings:
                 try:
                     with urllib.request.urlopen(url, timeout=5) as response:
                         response.read()
                     pings_done += 1
-                    logging.info(f"[KEEP-ALIVE] Ping {pings_done}/{max_pings} sent. Preventing Render sleep during active scraping.")
+                    logging.info(f"[KEEP-ALIVE] Ping {pings_done}/{max_pings} sent. Keeping Render active during cloud scraping.")
                 except Exception as e:
                     logging.debug(f"[KEEP-ALIVE] Internal ping failed: {e}")
         
-        logging.info("[KEEP-ALIVE] Worker finished and stopped. Render will automatically sleep after inactivity.")
+        logging.info("[KEEP-ALIVE] Worker finished. Render will automatically sleep after 15 minutes of inactivity.")
 
     pinger = threading.Thread(target=keep_alive_worker, daemon=True)
     pinger.start()
@@ -53,16 +53,17 @@ def trigger_scraper():
         logging.warning("Unauthorized scraper trigger attempt.")
         return jsonify({"error": "Unauthorized"}), 401
     
-    limit = None
+    # Default to top 100 newest items on cloud trigger for fast completion (~2.5 mins) without Render free-tier SIGTERM
+    limit = 100
     data = request.get_json(silent=True)
-    if isinstance(data, dict):
+    if isinstance(data, dict) and 'limit' in data:
         limit = data.get('limit')
 
     # Run the scraper in a background thread with keep-alive
     thread = threading.Thread(target=lambda: run_pipeline_with_keepalive(limit=limit))
     thread.start()
     
-    return jsonify({"status": "Scraper triggered successfully. Running in background with keep-alive."}), 202
+    return jsonify({"status": f"Scraper triggered successfully for top {limit} items. Running in background with keep-alive."}), 202
 
 import io
 
