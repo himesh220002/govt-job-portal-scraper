@@ -13,21 +13,28 @@ SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY", "default-secret-key")
 import urllib.request
 
 def run_pipeline_with_keepalive(limit=None):
-    """Runs scraping pipeline while sending internal HTTP pings every 2 minutes to prevent Render free-tier sleep SIGTERM."""
+    """Runs scraping pipeline with a controlled keep-alive worker. Pings every 5 minutes, max 4 times (20 mins max), then auto-exits to preserve Render free-tier hours."""
     stop_event = threading.Event()
     
     def keep_alive_worker():
         port = int(os.environ.get("PORT", 8080))
         url = f"http://127.0.0.1:{port}/"
-        while not stop_event.is_set():
-            stop_event.wait(120)  # Wait 2 minutes
-            if not stop_event.is_set():
+        max_pings = 4  # 4 pings max = 20 minutes max duration
+        pings_done = 0
+        
+        while not stop_event.is_set() and pings_done < max_pings:
+            # Wait 5 minutes (300 seconds)
+            stopped = stop_event.wait(300)
+            if not stopped and pings_done < max_pings:
                 try:
                     with urllib.request.urlopen(url, timeout=5) as response:
                         response.read()
-                    logging.info("[KEEP-ALIVE] Internal HTTP ping sent to prevent Render free tier sleep.")
+                    pings_done += 1
+                    logging.info(f"[KEEP-ALIVE] Ping {pings_done}/{max_pings} sent. Preventing Render sleep during active scraping.")
                 except Exception as e:
                     logging.debug(f"[KEEP-ALIVE] Internal ping failed: {e}")
+        
+        logging.info("[KEEP-ALIVE] Worker finished and stopped. Render will automatically sleep after inactivity.")
 
     pinger = threading.Thread(target=keep_alive_worker, daemon=True)
     pinger.start()
