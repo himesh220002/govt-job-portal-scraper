@@ -8,6 +8,7 @@ const quickLinks = [
   { label: 'Admit Cards', href: '/category/admit-card' },
   { label: 'Results', href: '/category/result' },
   { label: 'Answer Keys', href: '/category/answer-key' },
+  { label: 'Useful Tools', href: '/tools' },
   { label: 'About Us', href: '/about' },
   { label: 'FAQ', href: '/faq' },
 ];

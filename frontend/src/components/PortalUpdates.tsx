@@ -77,17 +77,21 @@ export default function PortalUpdates({ categorizedJobs, categoryOrder }: { cate
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-20">
-      <div className="mb-10 flex flex-col gap-3 sm:gap-6 md:flex-row md:items-end md:justify-between">
+      <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-xl text-white shadow-lg shadow-blue-600/25">
+          <div className="flex items-start gap-3 sm:items-center">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-xl text-white shadow-lg shadow-blue-600/25">
               🔄
             </span>
             <div>
-              <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900">Latest Portal Updates</h2>
-              <p className="mt-1 text-sm sm:tex-lg text-slate-500">Browse through all recent Sarkari Results and Job Postings.</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900">Latest Portal Updates</h2>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live • {totalCount} posts
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-slate-500">Everything fresh from official boards — jobs, results, admit cards and more. Sorted to show what matters most, right now.</p>
             </div>
-            <span className="hidden sm:block h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent ml-4" />
           </div>
         </div>
 

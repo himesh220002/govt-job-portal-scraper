@@ -170,12 +170,17 @@ export default async function HeroSection() {
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-xs sm:text-lg leading-relaxed text-blue-100/90 animate-fade-up [animation-delay:200ms]">
-            Get the latest Sarkari results, job notifications, admit cards, answer keys and syllabi — all in one place, updated daily from verified official sources.
+            Get the latest Sarkari results, job notifications, admit cards, answer keys and syllabi — all in one place, updated hourly from verified official sources.
           </p>
 
           <div className="mx-auto mt-9 max-w-2xl animate-fade-up [animation-delay:300ms]">
             <SearchBar />
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-medium text-blue-200/70">
+              <span className="h-px w-6 bg-white/10 hidden sm:block" />
+              <span>Try popular searches</span>
+              <span className="h-px w-6 bg-white/10 hidden sm:block" />
+            </div>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
               {popularSearches.map((term) => (
                 <Link
                   key={term}
@@ -186,10 +191,22 @@ export default async function HeroSection() {
                 </Link>
               ))}
             </div>
+            {/* trust micro-strip */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-[11px] font-semibold">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-blue-100 backdrop-blur">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> 50+ boards tracked
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-blue-100 backdrop-blur">
+                ⚡ Updates in minutes
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-blue-100 backdrop-blur">
+                🔓 100% free • No login needed
+              </span>
+            </div>
           </div>
 
           {/* Quick actions */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3 animate-fade-up [animation-delay:400ms]">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 animate-fade-up [animation-delay:400ms]">
             <Link
               href="/category/latest-job"
               className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-cyan-400 to-blue-600 px-4 py-2 md:px-7 md:py-3.5 text-sm font-bold text-white shadow-xl shadow-blue-600/30 transition-all hover:shadow-2xl hover:shadow-cyan-500/30 hover:scale-[1.03] active:scale-95"
@@ -207,6 +224,13 @@ export default async function HeroSection() {
               className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 md:px-7 md:py-3.5 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-cyan-300/40 hover:scale-[1.03] active:scale-95"
             >
               View Results
+            </Link>
+            <Link
+              href="#tools"
+              className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-blue-100 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white hover:border-white/20"
+            >
+              Useful Tools
+              <span className="rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] tracking-widest">NEW</span>
             </Link>
           </div>
 

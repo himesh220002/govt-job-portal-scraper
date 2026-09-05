@@ -16,6 +16,7 @@ const NAV_LINKS = [
   { label: 'Latest Jobs', href: '/category/latest-job', icon: '💼' },
   { label: 'Admit Cards', href: '/category/admit-card', icon: '🎟️' },
   { label: 'Results', href: '/category/result', icon: '📊' },
+  { label: 'Tools', href: '/tools', icon: '🛠️' },
   { label: 'Study Resources', href: '/resources', icon: '📚' },
 ];
 

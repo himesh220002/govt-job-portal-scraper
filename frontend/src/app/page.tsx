@@ -5,6 +5,8 @@ import HeroSection from '@/components/HeroSection';
 import PortalUpdates from '@/components/PortalUpdates';
 import InfoSection from '@/components/InfoSection';
 import PerksSection from '@/components/PerksSection';
+import UsefulToolsSection from '@/components/UsefulToolsSection';
+import BrowseBySection from '@/components/BrowseBySection';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
@@ -41,11 +43,13 @@ export default async function Home() {
 
       <PortalUpdates categorizedJobs={categorizedJobs} categoryOrder={categoryOrder} />
 
+      <BrowseBySection />
+
+      <UsefulToolsSection />
+
       <PerksSection />
 
       <InfoSection />
-
-
     </main>
   );
 }
