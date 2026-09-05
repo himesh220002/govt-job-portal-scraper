@@ -13,27 +13,28 @@ SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY", "default-secret-key")
 import urllib.request
 
 def run_pipeline_with_keepalive(limit=None):
-    """Runs scraping pipeline with an active keep-alive worker. Pings every 2 minutes until FULL scraping finishes completely across all categories."""
+    """Runs scraping pipeline with an active keep-alive worker. Pings every 2 minutes until FULL scraping finishes. Includes try...finally cleanup and a 60-minute hard safety ceiling."""
     stop_event = threading.Event()
     
     def keep_alive_worker():
         port = int(os.environ.get("PORT", 8080))
         url = f"http://127.0.0.1:{port}/"
         ping_count = 0
+        max_safety_pings = 30  # Safety ceiling: 30 pings max = 60 minutes max limit
         
-        while not stop_event.is_set():
+        while not stop_event.is_set() and ping_count < max_safety_pings:
             # Wait 2 minutes (120 seconds) between pings
             stopped = stop_event.wait(120)
-            if not stopped:
+            if not stopped and ping_count < max_safety_pings:
                 try:
                     with urllib.request.urlopen(url, timeout=5) as response:
                         response.read()
                     ping_count += 1
-                    logging.info(f"[KEEP-ALIVE] Ping #{ping_count} sent. Keeping Render active during full coverage scraping.")
+                    logging.info(f"[KEEP-ALIVE] Ping #{ping_count}/{max_safety_pings} sent. Keeping Render active during full coverage scraping.")
                 except Exception as e:
                     logging.debug(f"[KEEP-ALIVE] Internal ping failed: {e}")
         
-        logging.info(f"[KEEP-ALIVE] Full scraping completed! Total pings sent: {ping_count}. Render will sleep after 15 mins of inactivity.")
+        logging.info(f"[KEEP-ALIVE] Worker terminated (Total pings sent: {ping_count}). Render will sleep 15 mins after inactivity.")
 
     pinger = threading.Thread(target=keep_alive_worker, daemon=True)
     pinger.start()
@@ -41,6 +42,7 @@ def run_pipeline_with_keepalive(limit=None):
     try:
         run_pipeline(limit=limit)
     finally:
+        # Guaranteed to execute even if run_pipeline throws an exception or crashes
         stop_event.set()
 
 @app.route('/api/run-scraper', methods=['POST'])
