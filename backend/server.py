@@ -54,8 +54,9 @@ def trigger_scraper():
         return jsonify({"error": "Unauthorized"}), 401
     
     limit = None
-    if request.is_json and request.json:
-        limit = request.json.get('limit')
+    data = request.get_json(silent=True)
+    if isinstance(data, dict):
+        limit = data.get('limit')
 
     # Run the scraper in a background thread with keep-alive
     thread = threading.Thread(target=lambda: run_pipeline_with_keepalive(limit=limit))
